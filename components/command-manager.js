@@ -1,3 +1,5 @@
+const PlayCommand = require("./commands/play");
+
 const PingCommand = require("./commands/ping");
 const CoinCommand = require("./commands/coin");
 const ErrorCommand = require("./commands/error");
@@ -15,19 +17,32 @@ class CommandManager {
             let commandName = args[0];
             args = args.slice(1, args.length);
 
-            let command;
-            switch (commandName.toUpperCase()) {
-                case "PING":
-                    command = new PingCommand({ channel: msg.channel });
-                    break;
-                case "COIN":
-                    command = new CoinCommand({ channel: msg.channel });
-                    break;
-                default:
-                    command = new ErrorCommand({ channel: msg.channel });
-                    break;
+            try {
+                let command;
+                switch (commandName.toUpperCase()) {
+                    case "PLAY":
+                        command = new PlayCommand({
+                            musicManager: this.musicManager,
+                            member: msg.member,
+                            channel: msg.channel,
+                            url: args[0]
+                        });
+                        break;
+                    case "PING":
+                        command = new PingCommand({ channel: msg.channel });
+                        break;
+                    case "COIN":
+                        command = new CoinCommand({ channel: msg.channel });
+                        break;
+                    default:
+                        command = new ErrorCommand({ channel: msg.channel });
+                        break;
+                }
+                command.execute();
+            } catch (e) {
+                console.error(e);
+                new ErrorCommand({ channel: msg.channel }).execute();
             }
-            command.execute();
         }
     }
 }

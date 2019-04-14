@@ -17,20 +17,29 @@ class TrackLoader {
     }
 
     async loadPlaylist(url) {
-        let playlist = await this.youtube.getPlaylist(url);
-        let videos = await playlist.getVideos();
-        return videos.map(video => TrackLoader.videoToSong(video));
+        try {
+            let playlist = await this.youtube.getPlaylist(url);
+            let videos = await playlist.getVideos();
+            return videos.map(video => TrackLoader.videoToSong(video));
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     async loadTrack(url) {
-        let video = await this.youtube.getVideo(url);
-        return [TrackLoader.videoToSong(video)];
+        try {
+            let video = await this.youtube.getVideo(url);
+            return [TrackLoader.videoToSong(video)];
+        } catch (e) {
+            console.error(e);
+        }
     }
 
     static videoToSong(video) {
         return {
             id: video.id,
             title: Util.escapeMarkdown(video.title),
+            author: video.channel.title,
             url: `https://www.youtube.com/watch?v=${video.id}`
         };
     }

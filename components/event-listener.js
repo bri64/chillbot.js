@@ -1,13 +1,13 @@
 class EventListener {
     constructor(client, musicManager) {
         this.client = client;
-        this.CommandManager = new (require("./command-manager"))(client, musicManager);
+        this.commandManager = new (require("./command-manager"))(client, musicManager);
     }
 
     init() {
         // Messages
         this.client.on("message", msg => {
-            this.CommandManager.parseCommand(msg);
+            this.commandManager.parseCommand(msg);
         });
 
         // Other
