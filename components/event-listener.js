@@ -1,8 +1,7 @@
-
 class EventListener {
-    constructor(client) {
+    constructor(client, musicManager) {
         this.client = client;
-        this.CommandManager = new (require("./command-manager"))(client);
+        this.CommandManager = new (require("./command-manager"))(client, musicManager);
     }
 
     init() {
@@ -16,5 +15,3 @@ class EventListener {
 }
 
 module.exports = EventListener;
-
-

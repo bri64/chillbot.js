@@ -1,8 +1,9 @@
+const Config = require("./config");
 const Discord = require("discord.js");
 const Client = new Discord.Client();
-const Config = require("./config");
 const ClientHandler = new (require("./components/client-handler"))(Client, Config.tokens.discord);
-const EventListener = new (require("./components/event-listener"))(Client);
+const MusicManager = new (require("./components/music-manager"))(Client, Config.tokens.youtube);
+const EventListener = new (require("./components/event-listener"))(Client, MusicManager);
 
 ClientHandler.setup().then((result) => {
     console.info(result);

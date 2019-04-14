@@ -3,8 +3,9 @@ const CoinCommand = require("./commands/coin");
 const ErrorCommand = require("./commands/error");
 
 class CommandManager {
-    constructor(client) {
+    constructor(client, musicManager) {
         this.client = client;
+        this.musicManager = musicManager;
     }
 
     parseCommand(msg) {
@@ -28,7 +29,6 @@ class CommandManager {
             }
             command.execute();
         }
-
     }
 }
 
