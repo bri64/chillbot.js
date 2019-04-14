@@ -1,6 +1,5 @@
 const { Util } = require("discord.js");
 const YouTube = require('simple-youtube-api');
-const ytdl = require('ytdl-core');
 
 class TrackLoader {
     constructor(tokens) {

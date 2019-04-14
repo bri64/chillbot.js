@@ -1,6 +1,4 @@
-const LoopMode = {
-    NONE, ALL, ONE
-};
+const ytdl = require('ytdl-core');
 
 class MusicManager {
     constructor(client, tokens) {
@@ -52,5 +50,9 @@ class MusicManager {
 
     }
 }
+
+const LoopMode = {
+    NONE, ALL, ONE
+};
 
 module.exports = MusicManager;
