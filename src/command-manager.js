@@ -2,6 +2,7 @@ const PlayCommand = require("./commands/play");
 const PauseCommand = require("./commands/pause");
 const NextTrackCommand = require("./commands/next");
 const PrevTrackCommand = require("./commands/prev");
+const SeekCommand = require("./commands/seek");
 const KillCommand = require("./commands/kill");
 
 const PingCommand = require("./commands/ping");
@@ -80,6 +81,16 @@ class CommandManager {
                     case "COIN":
                         command = new CoinCommand({
                             channel: msg.channel
+                        });
+                        break;
+
+                    case "SEEK":
+                    case "FIND":
+                    case "GOTO":
+                        command = new SeekCommand({
+                            msg,
+                            musicManager: this.musicManager,
+                            query: args.join(" ")
                         });
                         break;
 

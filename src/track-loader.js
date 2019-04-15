@@ -20,6 +20,7 @@ class TrackLoader {
         try {
             let playlist = await this.youtube.getPlaylist(url);
             let videos = await playlist.getVideos();
+            console.info(`Loaded ${videos.length} videos.`);
             return videos.map(video => TrackLoader.videoToSong(video));
         } catch (e) {
             console.error(e);
