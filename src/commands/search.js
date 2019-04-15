@@ -2,7 +2,7 @@ const { RichEmbed } = require("discord.js");
 
 const Command = require("./command");
 
-class SearchCommand extends Command {
+exports.SearchCommand = class SearchCommand extends Command {
     async execute() {
         try {
             let results = await this.musicManager.search(this.query);
@@ -23,6 +23,4 @@ class SearchCommand extends Command {
             this.msg.reply(`No results found for '${this.query}'.`);
         }
     }
-}
-
-module.exports = SearchCommand;
+};

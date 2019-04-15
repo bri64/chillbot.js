@@ -2,7 +2,7 @@ const { RichEmbed } = require("discord.js");
 
 const Command = require("./command");
 
-class StatusCommand extends Command {
+exports.StatusCommand = class StatusCommand extends Command {
     async execute() {
         try {
             let results = await this.musicManager.playlist();
@@ -23,6 +23,4 @@ class StatusCommand extends Command {
             this.msg.reply("No songs in queue.");
         }
     }
-}
-
-module.exports = StatusCommand;
+};

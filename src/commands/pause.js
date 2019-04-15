@@ -1,6 +1,6 @@
 const Command = require("./command");
 
-class PauseCommand extends Command {
+exports.PauseCommand = class PauseCommand extends Command {
     execute() {
         try {
             this.musicManager.togglePause();
@@ -8,6 +8,4 @@ class PauseCommand extends Command {
             this.msg.reply("No songs in queue.");
         }
     }
-}
-
-module.exports = PauseCommand;
+};

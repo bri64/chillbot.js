@@ -1,6 +1,6 @@
 const Command = require("./command");
 
-class VolumeCommand extends Command {
+exports.VolumeCommand = class VolumeCommand extends Command {
     async execute() {
         try {
             let volume = (this.volume < 1) ? this.volume : (this.volume / 100);
@@ -9,6 +9,4 @@ class VolumeCommand extends Command {
             console.error(e);
         }
     }
-}
-
-module.exports = VolumeCommand;
+};

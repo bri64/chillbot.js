@@ -1,6 +1,6 @@
 const Command = require("./command");
 
-class NextTrackCommand extends Command {
+exports.NextTrackCommand = class NextTrackCommand extends Command {
     async execute() {
         try {
             await this.musicManager.nextTrack();
@@ -8,6 +8,4 @@ class NextTrackCommand extends Command {
             this.msg.reply("No songs in queue.");
         }
     }
-}
-
-module.exports = NextTrackCommand;
+};

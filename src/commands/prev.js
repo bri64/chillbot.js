@@ -1,6 +1,6 @@
 const Command = require("./command");
 
-class PrevTrackCommand extends Command {
+exports.PrevTrackCommand = class PrevTrackCommand extends Command {
     async execute() {
         try {
             await this.musicManager.prevTrack();
@@ -8,6 +8,4 @@ class PrevTrackCommand extends Command {
             this.msg.reply("No songs in queue.");
         }
     }
-}
-
-module.exports = PrevTrackCommand;
+};

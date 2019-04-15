@@ -1,21 +1,3 @@
-/* Voice Commands */
-const PlayCommand = require("./commands/play");
-const PauseCommand = require("./commands/pause");
-const NextTrackCommand = require("./commands/next");
-const PrevTrackCommand = require("./commands/prev");
-const SeekCommand = require("./commands/seek");
-const ShuffleCommand = require("./commands/shuffle");
-const SearchCommand = require("./commands/search");
-const VolumeCommand = require("./commands/volume");
-const CurrentCommand = require("./commands/current");
-const StatusCommand = require("./commands/status");
-const KillCommand = require("./commands/kill");
-
-/* Misc Commands */
-const PingCommand = require("./commands/ping");
-const CoinCommand = require("./commands/coin");
-const ErrorCommand = require("./commands/error");
-
 class CommandManager {
     constructor(musicManager) {
         this.musicManager = musicManager;
@@ -33,7 +15,7 @@ class CommandManager {
                 let command;
                 switch (commandName.toUpperCase()) {
                     case "PLAY":
-                        command = new PlayCommand({
+                        command = new Commands.PlayCommand({
                             msg,
                             musicManager: this.musicManager,
                             instant: true,
@@ -43,7 +25,7 @@ class CommandManager {
 
                     case "ADD":
                     case "QUEUE":
-                        command = new PlayCommand({
+                        command = new Commands.PlayCommand({
                             msg,
                             musicManager: this.musicManager,
                             instant: false,
@@ -54,7 +36,7 @@ class CommandManager {
                     case "UNPAUSE":
                     case "RESUME":
                     case "PAUSE":
-                        command = new PauseCommand({
+                        command = new Commands.PauseCommand({
                             msg,
                             musicManager: this.musicManager,
                         });
@@ -62,7 +44,7 @@ class CommandManager {
 
                     case "SKIP":
                     case "NEXT":
-                        command = new NextTrackCommand({
+                        command = new Commands.NextTrackCommand({
                             msg,
                             musicManager: this.musicManager
                         });
@@ -70,7 +52,7 @@ class CommandManager {
 
                     case "BACK":
                     case "PREV":
-                        command = new PrevTrackCommand({
+                        command = new Commands.PrevTrackCommand({
                             msg,
                             musicManager: this.musicManager
                         });
@@ -79,7 +61,7 @@ class CommandManager {
                     case "YOUTUBE":
                     case "LOOKUP":
                     case "SEARCH":
-                        command = new SearchCommand({
+                        command = new Commands.SearchCommand({
                             msg,
                             musicManager: this.musicManager,
                             query: args.join(" ")
@@ -89,7 +71,7 @@ class CommandManager {
                     case "SEEK":
                     case "FIND":
                     case "GOTO":
-                        command = new SeekCommand({
+                        command = new Commands.SeekCommand({
                             msg,
                             musicManager: this.musicManager,
                             query: args.join(" ")
@@ -98,7 +80,7 @@ class CommandManager {
 
                     case "RANDOM":
                     case "SHUFFLE":
-                        command = new ShuffleCommand({
+                        command = new Commands.ShuffleCommand({
                             msg,
                             musicManager: this.musicManager
                         });
@@ -108,7 +90,7 @@ class CommandManager {
                     case "MUTE":
                     case "SETVOLUME":
                     case "VOLUME":
-                        command = new VolumeCommand({
+                        command = new Commands.VolumeCommand({
                             msg,
                             musicManager: this.musicManager,
                             volume: args[0]
@@ -118,7 +100,7 @@ class CommandManager {
                     case "SONG":
                     case "NOWPLAYING":
                     case "CURRENT":
-                        command = new CurrentCommand({
+                        command = new Commands.CurrentCommand({
                             msg,
                             musicManager: this.musicManager
                         });
@@ -126,7 +108,7 @@ class CommandManager {
 
                     case "STATUS":
                     case "PLAYLIST":
-                        command = new StatusCommand({
+                        command = new Commands.StatusCommand({
                             msg,
                             musicManager: this.musicManager
                         });
@@ -134,14 +116,14 @@ class CommandManager {
 
                     case "STOP":
                     case "KILL":
-                        command = new KillCommand({
+                        command = new Commands.KillCommand({
                             msg,
                             musicManager: this.musicManager
                         });
                         break;
 
                     case "PING":
-                        command = new PingCommand({
+                        command = new Commands.PingCommand({
                             msg
                         });
                         break;
@@ -150,7 +132,7 @@ class CommandManager {
                     case "TAILS":
                     case "FLIP":
                     case "COIN":
-                        command = new CoinCommand({
+                        command = new Commands.CoinCommand({
                             msg
                         });
                         break;
@@ -158,13 +140,13 @@ class CommandManager {
                     default:
                         let otherCmd = this.commands[commandName.toUpperCase()];
                         if (otherCmd) {
-                            command = new PlayCommand({
+                            command = new Commands.PlayCommand({
                                 msg,
                                 musicManager: this.musicManager,
                                 url: otherCmd
                             });
                         } else {
-                            command = new ErrorCommand({
+                            command = new Commands.ErrorCommand({
                                 msg,
                                 error: "Unknown command!"
                             });
@@ -174,7 +156,7 @@ class CommandManager {
                 command.execute();
             } catch (e) {
                 console.error(e);
-                new ErrorCommand({
+                new Commands.ErrorCommand({
                     msg,
                     error: "An unknown error occurred!"
                 }).execute();
@@ -183,9 +165,16 @@ class CommandManager {
     }
 
     loadCommands(fs) {
-        let contentsJSON = fs.readFileSync("./src/commands/cmd-db.json");
+        // Dynamically load commands from ./commands
+        Commands = Object.values((require('require-all')(__dirname + '/commands')))
+            .reduce((tmp, item) => ({ ... tmp, ...item }));
+
+        // Load pre-defined commands
+        const definedCommands = "cmd-db.json";
+        const contentsJSON = fs.readFileSync(`./src/commands/${definedCommands}`);
         this.commands = JSON.parse(contentsJSON);
     }
 }
 
+let Commands = {};
 module.exports = CommandManager;

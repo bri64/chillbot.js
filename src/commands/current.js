@@ -2,7 +2,7 @@ const { RichEmbed } = require("discord.js");
 
 const Command = require("./command");
 
-class CurrentCommand extends Command {
+exports.CurrentCommand = class CurrentCommand extends Command {
     async execute() {
         try {
             let result = this.musicManager.getCurrentSong();
@@ -19,6 +19,4 @@ class CurrentCommand extends Command {
             this.msg.reply("No songs in queue.");
         }
     }
-}
-
-module.exports = CurrentCommand;
+};
