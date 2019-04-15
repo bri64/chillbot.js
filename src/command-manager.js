@@ -5,8 +5,10 @@ const NextTrackCommand = require("./commands/next");
 const PrevTrackCommand = require("./commands/prev");
 const SeekCommand = require("./commands/seek");
 const ShuffleCommand = require("./commands/shuffle");
-const KillCommand = require("./commands/kill");
 const SearchCommand = require("./commands/search");
+const CurrentCommand = require("./commands/current");
+const StatusCommand = require("./commands/status");
+const KillCommand = require("./commands/kill");
 
 /* Misc Commands */
 const PingCommand = require("./commands/ping");
@@ -83,6 +85,41 @@ class CommandManager {
                         });
                         break;
 
+                    case "SEEK":
+                    case "FIND":
+                    case "GOTO":
+                        command = new SeekCommand({
+                            msg,
+                            musicManager: this.musicManager,
+                            query: args.join(" ")
+                        });
+                        break;
+
+                    case "RANDOM":
+                    case "SHUFFLE":
+                        command = new ShuffleCommand({
+                            msg,
+                            musicManager: this.musicManager
+                        });
+                        break;
+
+                    case "SONG":
+                    case "NOWPLAYING":
+                    case "CURRENT":
+                        command = new CurrentCommand({
+                            msg,
+                            musicManager: this.musicManager
+                        });
+                        break;
+
+                    case "STATUS":
+                    case "PLAYLIST":
+                        command = new StatusCommand({
+                            msg,
+                            musicManager: this.musicManager
+                        });
+                        break;
+
                     case "STOP":
                     case "KILL":
                         command = new KillCommand({
@@ -103,24 +140,6 @@ class CommandManager {
                     case "COIN":
                         command = new CoinCommand({
                             msg
-                        });
-                        break;
-
-                    case "SEEK":
-                    case "FIND":
-                    case "GOTO":
-                        command = new SeekCommand({
-                            msg,
-                            musicManager: this.musicManager,
-                            query: args.join(" ")
-                        });
-                        break;
-
-                    case "RANDOM":
-                    case "SHUFFLE":
-                        command = new ShuffleCommand({
-                            msg,
-                            musicManager: this.musicManager
                         });
                         break;
 

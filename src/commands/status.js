@@ -2,10 +2,10 @@ const { RichEmbed } = require("discord.js");
 
 const Command = require("./command");
 
-class SearchCommand extends Command {
+class StatusCommand extends Command {
     async execute() {
         try {
-            let results = await this.musicManager.search(this.query);
+            let results = await this.musicManager.playlist();
             let fields = [];
             for (let result of results) {
                 fields.push({
@@ -15,14 +15,14 @@ class SearchCommand extends Command {
                 });
             }
             this.msg.reply(new RichEmbed({
-                title: 'Search Results',
+                title: `Upcoming Songs (${results.length}):`,
                 fields: fields,
-                color: 0xFF0000
+                color: 0x00AAFF
             }));
-        } catch(e) {
-            this.msg.reply(`No results found for '${this.query}'.`);
+        } catch {
+            this.msg.reply("No songs in queue.");
         }
     }
 }
 
-module.exports = SearchCommand;
+module.exports = StatusCommand;

@@ -2,7 +2,11 @@ const Command = require("./command");
 
 class PauseCommand extends Command {
     execute() {
-        this.musicManager.togglePause();
+        try {
+            this.musicManager.togglePause();
+        } catch {
+            this.msg.reply("No songs in queue.");
+        }
     }
 }
 

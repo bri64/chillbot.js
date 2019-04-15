@@ -1,11 +1,12 @@
 const Command = require("./command");
 
 class PrevTrackCommand extends Command {
-    execute() {
-        this.musicManager.prevTrack()
-            .catch((e) => {
-                console.error(e);
-            });
+    async execute() {
+        try {
+            await this.musicManager.prevTrack();
+        } catch {
+            this.msg.reply("No songs in queue.");
+        }
     }
 }
 

@@ -4,13 +4,13 @@ const Utils = require("./utils");
 class MusicManager {
     constructor(client, tokens) {
         this.client = client;
-        this.tokens = tokens;
 
         this.trackLoader = new (require("./track-loader"))(tokens);
         this.queue = [];
         this.currentSong = 0;
         this.currentVoiceChannel = null;
         this.isPlaying = false;
+        this.isPaused = false;
         this.isShuffle = true;
         this.loopMode = LoopMode.ALL;
         this.dispatcher = null;
@@ -19,13 +19,13 @@ class MusicManager {
 
     async play(song, voiceChannel) {
         try {
-
             console.log("Playing: " + song.title);
 
             this.currentVoiceChannel = voiceChannel;
             let connection = await voiceChannel.join();
 
             this.isPlaying = true;
+            this.isPaused = false;
             this.currentSong = this.queue.indexOf(song);
 
             let streamOptions = {
@@ -49,19 +49,22 @@ class MusicManager {
 
     togglePause() {
         if (this.dispatcher) {
-            if (this.isPlaying) {
-                this.isPlaying = false;
+            if (this.isPaused) {
+                this.isPaused = false;
                 this.dispatcher.pause();
             } else {
-                this.isPlaying = true;
+                this.isPaused = true;
                 this.dispatcher.resume();
             }
+        } else {
+            throw new Error();
         }
     }
 
     async stop() {
         try {
             this.isPlaying = false;
+            this.isPaused = false;
             this.queue = [];
             this.currentSong = 0;
             if (this.currentVoiceChannel) {
@@ -76,56 +79,66 @@ class MusicManager {
     }
 
     async nextTrack() {
-        let voiceChannel = this.currentVoiceChannel;
-        switch (this.loopMode) {
-            case LoopMode.NONE:
-                if (this.currentSong !== this.queue.length - 1) {
-                    await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], voiceChannel);
-                } else {
-                    await this.stop();
-                }
-                break;
-            case LoopMode.ALL:
-                await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], voiceChannel);
-                break;
-            case LoopMode.ONE:
-            default:
-                await this.play(this.queue[(this.currentSong)], voiceChannel);
-                break;
+        if (this.activeQueue()) {
+            switch (this.loopMode) {
+                case LoopMode.NONE:
+                    if (this.currentSong !== this.queue.length - 1) {
+                        await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], this.currentVoiceChannel);
+                    } else {
+                        await this.stop();
+                    }
+                    break;
+                case LoopMode.ALL:
+                    await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], this.currentVoiceChannel);
+                    break;
+                case LoopMode.ONE:
+                default:
+                    await this.play(this.queue[(this.currentSong)], this.currentVoiceChannel);
+                    break;
+            }
+        } else {
+            throw new Error();
         }
     }
 
     async prevTrack() {
-        let voiceChannel = this.currentVoiceChannel;
-        switch (this.loopMode) {
-            case LoopMode.NONE:
-                if (this.currentSong !== 0) {
-                    await this.play(this.queue[((this.currentSong - 1) % this.queue.length)], voiceChannel);
-                } else {
-                    await this.play(this.queue[(this.currentSong)], voiceChannel);
-                }
-                break;
-            case LoopMode.ALL:
-                await this.play(this.queue[((this.currentSong - 1) % this.queue.length)], voiceChannel);
-                break;
-            case LoopMode.ONE:
-            default:
-                await this.play(this.queue[(this.currentSong)], voiceChannel);
-                break;
+        if (this.activeQueue()) {
+            switch (this.loopMode) {
+                case LoopMode.NONE:
+                    if (this.currentSong !== 0) {
+                        await this.play(this.queue[((this.currentSong - 1) % this.queue.length)], this.currentVoiceChannel);
+                    } else {
+                        await this.play(this.queue[(this.currentSong)], this.currentVoiceChannel);
+                    }
+                    break;
+                case LoopMode.ALL:
+                    await this.play(this.queue[((this.currentSong - 1) % this.queue.length)], this.currentVoiceChannel);
+                    break;
+                case LoopMode.ONE:
+                default:
+                    await this.play(this.queue[(this.currentSong)], this.currentVoiceChannel);
+                    break;
+            }
+        } else {
+            throw new Error();
         }
     }
     
     async seek(query) {
-        let results = this.queue.filter(song => song.title.toUpperCase().includes(query.toUpperCase()));
-        if (results.length > 0) {
-            await this.play(results[0], this.currentVoiceChannel);
+        if (this.activeQueue()) {
+            let results = this.queue.filter(song => song.title.toUpperCase().includes(query.toUpperCase()));
+            if (results.length > 0) {
+                await this.play(results[0], this.currentVoiceChannel);
+            } else {
+                throw new Error();
+            }
         } else {
             throw new Error();
         }
     }
 
     async shuffle() {
-        if (this.queue.length > 0) {
+        if (this.activeQueue()) {
             this.queue = Utils.shuffleArray(this.queue);
             await this.play(this.queue[0], this.currentVoiceChannel);
         } else {
@@ -135,6 +148,24 @@ class MusicManager {
 
     async search(query) {
         return await this.trackLoader.search(query);
+    }
+
+    getCurrentSong() {
+        if (this.activeQueue()) {
+            return this.queue[this.currentSong];
+        } else {
+            throw new Error();
+        }
+    }
+
+    playlist() {
+        if (this.activeQueue()) {
+            let start = this.currentSong + 1;
+            let end = start + 5;
+            return this.queue.slice(start, (this.queue.length >= end) ? end : this.queue.length);
+        } else {
+            throw new Error();
+        }
     }
 
     toggleShuffle() {
@@ -171,6 +202,10 @@ class MusicManager {
         if (instant || !this.isPlaying) {
             await this.play(songs[0], member.voiceChannel);
         }
+    }
+    
+    activeQueue() {
+        return (this.currentVoiceChannel && this.queue.length > 0);
     }
 }
 

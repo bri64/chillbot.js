@@ -5,7 +5,7 @@ class ShuffleCommand extends Command {
         try {
             await this.musicManager.shuffle();
         } catch {
-            this.msg.reply('There are no songs to shuffle');
+            this.msg.reply("No songs in queue.");
         }
     }
 }
