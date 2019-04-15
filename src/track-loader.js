@@ -36,6 +36,14 @@ class TrackLoader {
         }
     }
 
+    async search(query) {
+        try {
+            return (await this.youtube.searchVideos(query)).map(video => TrackLoader.videoToSong(video));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     static videoToSong(video) {
         return {
             id: video.id,

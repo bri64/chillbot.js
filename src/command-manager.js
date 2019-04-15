@@ -1,3 +1,4 @@
+/* Voice Commands */
 const PlayCommand = require("./commands/play");
 const PauseCommand = require("./commands/pause");
 const NextTrackCommand = require("./commands/next");
@@ -5,7 +6,9 @@ const PrevTrackCommand = require("./commands/prev");
 const SeekCommand = require("./commands/seek");
 const ShuffleCommand = require("./commands/shuffle");
 const KillCommand = require("./commands/kill");
+const SearchCommand = require("./commands/search");
 
+/* Misc Commands */
 const PingCommand = require("./commands/ping");
 const CoinCommand = require("./commands/coin");
 const ErrorCommand = require("./commands/error");
@@ -67,6 +70,16 @@ class CommandManager {
                         command = new PrevTrackCommand({
                             msg,
                             musicManager: this.musicManager
+                        });
+                        break;
+
+                    case "YOUTUBE":
+                    case "LOOKUP":
+                    case "SEARCH":
+                        command = new SearchCommand({
+                            msg,
+                            musicManager: this.musicManager,
+                            query: args.join(" ")
                         });
                         break;
 

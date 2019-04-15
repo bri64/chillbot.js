@@ -133,6 +133,10 @@ class MusicManager {
         }
     }
 
+    async search(query) {
+        return await this.trackLoader.search(query);
+    }
+
     toggleShuffle() {
         this.isShuffle = !this.isShuffle;
     }
