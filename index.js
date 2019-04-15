@@ -1,9 +1,11 @@
 const Config = require("./config");
+const fs = require("fs");
 const Discord = require("discord.js");
 const Client = new Discord.Client();
 const ClientHandler = new (require("./src/client-handler"))(Client, Config.tokens.discord);
 const MusicManager = new (require("./src/music-manager"))(Client, Config.tokens);
-const EventListener = new (require("./src/event-listener"))(Client, MusicManager);
+const CommandManager = new (require("./src/command-manager"))(Client, MusicManager);
+const EventListener = new (require("./src/event-listener"))(Client, MusicManager, CommandManager);
 
 ClientHandler.setup()
     .then((result) => {
@@ -16,4 +18,5 @@ ClientHandler.setup()
 
 let afterReady = () => {
     EventListener.init();
+    CommandManager.loadCommands(fs);
 };

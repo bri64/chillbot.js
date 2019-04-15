@@ -13,6 +13,7 @@ class CommandManager {
     constructor(client, musicManager) {
         this.client = client;
         this.musicManager = musicManager;
+        this.commands = [];
     }
 
     parseCommand(msg) {
@@ -95,9 +96,19 @@ class CommandManager {
                         break;
 
                     default:
-                        command = new ErrorCommand({
-                            channel: msg.channel
-                        });
+                        let otherCmd = this.commands[commandName.toUpperCase()];
+                        if (otherCmd) {
+                            command = new PlayCommand({
+                                musicManager: this.musicManager,
+                                member: msg.member,
+                                channel: msg.channel,
+                                url: otherCmd
+                            });
+                        } else {
+                            command = new ErrorCommand({
+                                channel: msg.channel
+                            });
+                        }
                         break;
                 }
                 command.execute();
@@ -108,6 +119,11 @@ class CommandManager {
                 }).execute();
             }
         }
+    }
+
+    loadCommands(fs) {
+        let contentsJSON = fs.readFileSync("./src/commands/cmd-db.json");
+        this.commands = JSON.parse(contentsJSON);
     }
 }
 

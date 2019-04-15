@@ -1,7 +1,7 @@
 class EventListener {
-    constructor(client, musicManager) {
+    constructor(client, musicManager, commandManager) {
         this.client = client;
-        this.commandManager = new (require("./command-manager"))(client, musicManager);
+        this.commandManager = commandManager;
     }
 
     init() {
