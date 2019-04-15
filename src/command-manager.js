@@ -4,7 +4,7 @@ class CommandManager {
         this.commands = [];
     }
 
-    parseCommand(msg) {
+    async parseCommand(msg) {
         let message = msg.content;
         if (message[0] === "!") {
             let args = message.slice(1, message.length).split(" ");
@@ -86,6 +86,16 @@ class CommandManager {
                         });
                         break;
 
+                    case "SETSHUFFLE":
+                    case "SHUFFLETOGGLE":
+                    case "TOGGLESHUFFLE":
+                        command = new Commands.ToggleShuffleCommand({
+                            msg,
+                            musicManager: this.musicManager,
+                            shuffle: args[0]
+                        });
+                        break;
+
                     case "VOL":
                     case "MUTE":
                     case "SETVOLUME":
@@ -153,7 +163,7 @@ class CommandManager {
                         }
                         break;
                 }
-                command.execute();
+                await command.execute();
             } catch (e) {
                 console.error(e);
                 new Commands.ErrorCommand({

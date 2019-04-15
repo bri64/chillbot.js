@@ -177,8 +177,8 @@ class MusicManager {
         }
     }
 
-    toggleShuffle() {
-        this.isShuffle = !this.isShuffle;
+    toggleShuffle(toggle) {
+        this.isShuffle = toggle;
     }
 
     toggleLoop() {
