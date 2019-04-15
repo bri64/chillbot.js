@@ -9,23 +9,22 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "set": "npm remove node-opus",
     "start": "node index"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bufferutil": "^3.0.3",
     "discord.js": "^11.4.2",
+    "erlpack": "discordapp/erlpack",
     "ffmpeg": "0.0.4",
     "ffmpeg-binaries": "^4.0.0",
-    "simple-youtube-api": "^5.1.1",
-    "ytdl-core": "^0.29.1",
-    "bufferutil": "^3.0.3",
-    "erlpack": "discordapp/erlpack",
-    "node-opus": "^0.2.7",
-    "opusscript": "^0.0.6",
-    "sodium": "^2.0.3",
     "libsodium-wrappers": "^0.7.4",
-    "uws": "9.14.0"
+    "opusscript": "^0.0.6",
+    "simple-youtube-api": "^5.1.1",
+    "uws": "9.14.0",
+    "ytdl-core": "^0.29.1"
   }
 }

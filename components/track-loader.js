@@ -40,7 +40,8 @@ class TrackLoader {
             id: video.id,
             title: Util.escapeMarkdown(video.title),
             author: video.channel.title,
-            url: `https://www.youtube.com/watch?v=${video.id}`
+            url: `https://www.youtube.com/watch?v=${video.id}`,
+            video: video
         };
     }
 

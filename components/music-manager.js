@@ -9,31 +9,56 @@ class MusicManager {
         this.queue = [];
         this.state = {
             currentSong: 0,
-            currentVoiceChannel: 0,
+            currentVoiceChannel: null,
             isPlaying: false,
             isShuffle: true,
-            loopMode: LoopMode.ALL
+            loopMode: LoopMode.ALL,
+            dispatcher: null,
         };
     }
 
 
     async play(song, voiceChannel) {
         try {
+            console.log("Playing: " + song.title);
+            console.log(song.video);
+
             this.state.currentVoiceChannel = voiceChannel;
             let connection = await voiceChannel.join();
 
             this.state.isPlaying = true;
             this.state.currentSong = this.queue.indexOf(song);
-            connection.playStream(ytdl(song.url))
-                .on("end", () => this.nextTrack())
-                .on("error", (e) => console.error(e));
+
+            let streamOptions = {
+                quality: "highestaudio",
+                filter: "audioonly",
+                liveBuffer: 50
+            };
+
+            this.state.dispatcher = connection.playStream(ytdl(song.url, streamOptions))
+                .on("end", async (reason) => {
+                    console.log("Reason: " + reason);
+                    if (reason != null) {
+                        await this.nextTrack();
+                    }
+                }).on("error", (e) => console.error(e));
         } catch (e) {
             console.error(e);
         }
     }
 
-    pause() {
-
+    togglePause() {
+        if (this.state.dispatcher) {
+            if (this.state.isPlaying) {
+                this.state.isPlaying = false;
+                this.state.dispatcher.pause();
+                console.info('Audio Paused.');
+            } else {
+                this.state.isPlaying = true;
+                this.state.dispatcher.resume();
+                console.info('Audio Resumed')
+            }
+        }
     }
 
     stop() {
@@ -50,17 +75,17 @@ class MusicManager {
         switch (this.state.loopMode) {
             case LoopMode.NONE:
                 if (this.state.currentSong !== this.queue.length - 1) {
-                    await this.play(this.queue.get((this.state.currentSong + 1) % this.queue.length), voiceChannel);
+                    await this.play(this.queue[((this.state.currentSong + 1) % this.queue.length)], voiceChannel);
                 } else {
                     this.stop();
                 }
                 break;
             case LoopMode.ALL:
-                await this.play(this.queue.get((this.state.currentSong + 1) % this.queue.length), voiceChannel);
+                await this.play(this.queue[((this.state.currentSong + 1) % this.queue.length)], voiceChannel);
                 break;
             case LoopMode.ONE:
             default:
-                await this.play(this.queue.get(this.state.currentSong), voiceChannel);
+                await this.play(this.queue[(this.state.currentSong)], voiceChannel);
                 break;
         }
     }
@@ -70,17 +95,17 @@ class MusicManager {
         switch (this.state.loopMode) {
             case LoopMode.NONE:
                 if (this.state.currentSong !== 0) {
-                    await this.play(this.queue.get((this.state.currentSong - 1) % this.queue.length), voiceChannel);
+                    await this.play(this.queue[((this.state.currentSong - 1) % this.queue.length)], voiceChannel);
                 } else {
-                    await this.play(this.queue.get(this.state.currentSong), voiceChannel);
+                    await this.play(this.queue[(this.state.currentSong)], voiceChannel);
                 }
                 break;
             case LoopMode.ALL:
-                await this.play(this.queue.get((this.state.currentSong - 1) % this.queue.length), voiceChannel);
+                await this.play(this.queue[((this.state.currentSong - 1) % this.queue.length)], voiceChannel);
                 break;
             case LoopMode.ONE:
             default:
-                await this.play(this.queue.get(this.state.currentSong), voiceChannel);
+                await this.play(this.queue[(this.state.currentSong)], voiceChannel);
                 break;
         }
     }
@@ -114,7 +139,7 @@ class MusicManager {
             songs = this.shuffleArray(songs);
         }
 
-        this.queue = [ ...this.queue, songs ];
+        this.queue = [ ... this.queue, ... songs ];
 
         if (instant) {
             console.log("playing...");

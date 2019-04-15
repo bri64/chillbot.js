@@ -1,4 +1,8 @@
 const PlayCommand = require("./commands/play");
+const PauseCommand = require("./commands/pause");
+const NextTrackCommand = require("./commands/next");
+const PrevTrackCommand = require("./commands/prev");
+const KillCommand = require("./commands/kill");
 
 const PingCommand = require("./commands/ping");
 const CoinCommand = require("./commands/coin");
@@ -28,20 +32,69 @@ class CommandManager {
                             url: args[0]
                         });
                         break;
+
+                    case "UNPAUSE":
+                    case "RESUME":
+                    case "PAUSE":
+                        command = new PauseCommand({
+                            musicManager: this.musicManager,
+                            member: msg.member,
+                            channel: msg.channel,
+                        });
+                        break;
+
+                    case "SKIP":
+                    case "NEXT":
+                        command = new NextTrackCommand({
+                            musicManager: this.musicManager,
+                            member: msg.member,
+                            channel: msg.channel
+                        });
+                        break;
+
+                    case "BACK":
+                    case "PREV":
+                        command = new PrevTrackCommand({
+                            musicManager: this.musicManager,
+                            member: msg.member,
+                            channel: msg.channel
+                        });
+                        break;
+
+                    case "STOP":
+                    case "KILL":
+                        command = new KillCommand({
+                            musicManager: this.musicManager
+                        });
+                        break;
+
                     case "PING":
-                        command = new PingCommand({ channel: msg.channel });
+                        command = new PingCommand({
+                            channel: msg.channel
+                        });
                         break;
+
+                    case "HEADS":
+                    case "TAILS":
+                    case "FLIP":
                     case "COIN":
-                        command = new CoinCommand({ channel: msg.channel });
+                        command = new CoinCommand({
+                            channel: msg.channel
+                        });
                         break;
+
                     default:
-                        command = new ErrorCommand({ channel: msg.channel });
+                        command = new ErrorCommand({
+                            channel: msg.channel
+                        });
                         break;
                 }
                 command.execute();
             } catch (e) {
                 console.error(e);
-                new ErrorCommand({ channel: msg.channel }).execute();
+                new ErrorCommand({
+                    channel: msg.channel
+                }).execute();
             }
         }
     }
