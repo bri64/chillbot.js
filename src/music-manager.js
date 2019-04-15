@@ -13,6 +13,7 @@ class MusicManager {
         this.isPaused = false;
         this.isShuffle = true;
         this.loopMode = LoopMode.ALL;
+        this.volume = 0.3;
         this.dispatcher = null;
     }
 
@@ -40,6 +41,7 @@ class MusicManager {
                         await this.nextTrack();
                     }
                 }).on("error", (e) => console.error(e));
+            this.dispatcher.setVolumeLogarithmic(this.volume);
             await this.client.user.setActivity(`🎵 ${song.title}`, { type: 'LISTENING' });
             await this.client.user.setStatus('online');
         } catch (e) {
@@ -148,6 +150,13 @@ class MusicManager {
 
     async search(query) {
         return await this.trackLoader.search(query);
+    }
+
+    setVolume(volume) {
+        this.volume = volume;
+        if (this.dispatcher) {
+            this.dispatcher.setVolumeLogarithmic(volume);
+        }
     }
 
     getCurrentSong() {

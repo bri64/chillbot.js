@@ -6,6 +6,7 @@ const PrevTrackCommand = require("./commands/prev");
 const SeekCommand = require("./commands/seek");
 const ShuffleCommand = require("./commands/shuffle");
 const SearchCommand = require("./commands/search");
+const VolumeCommand = require("./commands/volume");
 const CurrentCommand = require("./commands/current");
 const StatusCommand = require("./commands/status");
 const KillCommand = require("./commands/kill");
@@ -100,6 +101,17 @@ class CommandManager {
                         command = new ShuffleCommand({
                             msg,
                             musicManager: this.musicManager
+                        });
+                        break;
+
+                    case "VOL":
+                    case "MUTE":
+                    case "SETVOLUME":
+                    case "VOLUME":
+                        command = new VolumeCommand({
+                            msg,
+                            musicManager: this.musicManager,
+                            volume: args[0]
                         });
                         break;
 
