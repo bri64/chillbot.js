@@ -1,6 +1,6 @@
 class Command {
     constructor(params) {
-        this.params = params;
+        Object.assign(this, params);
     }
 
     execute() {}

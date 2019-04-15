@@ -3,6 +3,7 @@ const PauseCommand = require("./commands/pause");
 const NextTrackCommand = require("./commands/next");
 const PrevTrackCommand = require("./commands/prev");
 const SeekCommand = require("./commands/seek");
+const ShuffleCommand = require("./commands/shuffle");
 const KillCommand = require("./commands/kill");
 
 const PingCommand = require("./commands/ping");
@@ -10,8 +11,7 @@ const CoinCommand = require("./commands/coin");
 const ErrorCommand = require("./commands/error");
 
 class CommandManager {
-    constructor(client, musicManager) {
-        this.client = client;
+    constructor(musicManager) {
         this.musicManager = musicManager;
         this.commands = [];
     }
@@ -28,9 +28,19 @@ class CommandManager {
                 switch (commandName.toUpperCase()) {
                     case "PLAY":
                         command = new PlayCommand({
+                            msg,
                             musicManager: this.musicManager,
-                            member: msg.member,
-                            channel: msg.channel,
+                            instant: true,
+                            url: args[0]
+                        });
+                        break;
+
+                    case "ADD":
+                    case "QUEUE":
+                        command = new PlayCommand({
+                            msg,
+                            musicManager: this.musicManager,
+                            instant: false,
                             url: args[0]
                         });
                         break;
@@ -39,40 +49,38 @@ class CommandManager {
                     case "RESUME":
                     case "PAUSE":
                         command = new PauseCommand({
+                            msg,
                             musicManager: this.musicManager,
-                            member: msg.member,
-                            channel: msg.channel,
                         });
                         break;
 
                     case "SKIP":
                     case "NEXT":
                         command = new NextTrackCommand({
-                            musicManager: this.musicManager,
-                            member: msg.member,
-                            channel: msg.channel
+                            msg,
+                            musicManager: this.musicManager
                         });
                         break;
 
                     case "BACK":
                     case "PREV":
                         command = new PrevTrackCommand({
-                            musicManager: this.musicManager,
-                            member: msg.member,
-                            channel: msg.channel
+                            msg,
+                            musicManager: this.musicManager
                         });
                         break;
 
                     case "STOP":
                     case "KILL":
                         command = new KillCommand({
+                            msg,
                             musicManager: this.musicManager
                         });
                         break;
 
                     case "PING":
                         command = new PingCommand({
-                            channel: msg.channel
+                            msg
                         });
                         break;
 
@@ -81,7 +89,7 @@ class CommandManager {
                     case "FLIP":
                     case "COIN":
                         command = new CoinCommand({
-                            channel: msg.channel
+                            msg
                         });
                         break;
 
@@ -95,18 +103,26 @@ class CommandManager {
                         });
                         break;
 
+                    case "RANDOM":
+                    case "SHUFFLE":
+                        command = new ShuffleCommand({
+                            msg,
+                            musicManager: this.musicManager
+                        });
+                        break;
+
                     default:
                         let otherCmd = this.commands[commandName.toUpperCase()];
                         if (otherCmd) {
                             command = new PlayCommand({
+                                msg,
                                 musicManager: this.musicManager,
-                                member: msg.member,
-                                channel: msg.channel,
                                 url: otherCmd
                             });
                         } else {
                             command = new ErrorCommand({
-                                channel: msg.channel
+                                msg,
+                                error: "Unknown command!"
                             });
                         }
                         break;
@@ -115,7 +131,8 @@ class CommandManager {
             } catch (e) {
                 console.error(e);
                 new ErrorCommand({
-                    channel: msg.channel
+                    msg,
+                    error: "An unknown error occurred!"
                 }).execute();
             }
         }

@@ -21,7 +21,6 @@ class MusicManager {
         try {
 
             console.log("Playing: " + song.title);
-            console.log(song.video);
 
             this.currentVoiceChannel = voiceChannel;
             let connection = await voiceChannel.join();
@@ -37,11 +36,12 @@ class MusicManager {
 
             this.dispatcher = connection.playStream(ytdl(song.url, streamOptions))
                 .on("end", async (reason) => {
-                    console.log("Reason: " + reason);
                     if (reason != null) {
                         await this.nextTrack();
                     }
                 }).on("error", (e) => console.error(e));
+            await this.client.user.setActivity(`🎵 ${song.title}`, { type: 'LISTENING' });
+            await this.client.user.setStatus('online');
         } catch (e) {
             console.error(e);
         }
@@ -52,22 +52,27 @@ class MusicManager {
             if (this.isPlaying) {
                 this.isPlaying = false;
                 this.dispatcher.pause();
-                console.info('Audio Paused.');
             } else {
                 this.isPlaying = true;
                 this.dispatcher.resume();
-                console.info('Audio Resumed')
             }
         }
     }
 
-    stop() {
-        this.isPlaying = false;
-        this.queue = [];
-        this.currentSong = 0;
-        this.currentVoiceChannel.leave();
-        this.currentVoiceChannel = null;
-
+    async stop() {
+        try {
+            this.isPlaying = false;
+            this.queue = [];
+            this.currentSong = 0;
+            if (this.currentVoiceChannel) {
+                this.currentVoiceChannel.leave();
+                this.currentVoiceChannel = null;
+            }
+            await this.client.user.setStatus('idle');
+            await this.client.user.setActivity('🎵 No Songs Playing', { type: "LISTENING" });
+        } catch(e) {
+            console.error(e);
+        }
     }
 
     async nextTrack() {
@@ -77,7 +82,7 @@ class MusicManager {
                 if (this.currentSong !== this.queue.length - 1) {
                     await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], voiceChannel);
                 } else {
-                    this.stop();
+                    await this.stop();
                 }
                 break;
             case LoopMode.ALL:
@@ -119,8 +124,13 @@ class MusicManager {
         }
     }
 
-    shuffle() {
-        this.queue = Utils.shuffleArray(this.queue);
+    async shuffle() {
+        if (this.queue.length > 0) {
+            this.queue = Utils.shuffleArray(this.queue);
+            await this.play(this.queue[0], this.currentVoiceChannel);
+        } else {
+            throw new Error();
+        }
     }
 
     toggleShuffle() {
@@ -154,7 +164,7 @@ class MusicManager {
 
         this.queue = [ ... this.queue, ... songs ];
 
-        if (instant) {
+        if (instant || !this.isPlaying) {
             await this.play(songs[0], member.voiceChannel);
         }
     }

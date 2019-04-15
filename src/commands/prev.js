@@ -1,18 +1,11 @@
 const Command = require("./command");
 
 class PrevTrackCommand extends Command {
-    constructor(params) {
-        super(params);
-        Object.assign(this, params);
-    }
-
     execute() {
-        this.musicManager.prevTrack().then(() => {
-
-        })
-        .catch((e) => {
-            console.error(e);
-        });
+        this.musicManager.prevTrack()
+            .catch((e) => {
+                console.error(e);
+            });
     }
 }
 

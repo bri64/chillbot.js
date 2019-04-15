@@ -1,17 +1,12 @@
 const Command = require("./command");
 
 class PlayCommand extends Command {
-    constructor(params) {
-        super(params);
-        Object.assign(this, params);
-    }
-
     execute() {
-        this.musicManager.addToQueue(this.url, this.member, true).then(() => {
-            this.channel.send("Now playing!");
+        this.musicManager.addToQueue(this.url, this.msg.member, this.instant).then(() => {
+
         })
         .catch(() => {
-            this.channel.send("Failed to load URL!");
+            this.msg.reply(`Failed to load ${this.url}!`);
         });
     }
 }
