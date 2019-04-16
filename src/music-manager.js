@@ -34,10 +34,10 @@ class MusicManager {
             let songs = await this.trackLoader.loadURL(url);
             songs = songs.filter(song => {
                 return song.title !== "Deleted video"
-                    && (song.video)
+                    || ((song.video)
                     && (song.video.raw)
                     && (song.video.raw.status)
-                    && (song.video.raw.status.privacyStatus !== "private");
+                    && (song.video.raw.status.privacyStatus !== "private"));
             });
             if (shard.isShuffle) {
                 songs = Utils.shuffleArray(songs);
