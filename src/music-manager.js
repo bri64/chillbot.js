@@ -28,21 +28,28 @@ class MusicManager {
 
     /* Music */
     async addToQueue(guild, url, channel, instant) {
-        let shard = this.getShard(guild);
+        try {
+            let shard = this.getShard(guild);
 
-        let songs = await this.trackLoader.loadURL(url);
-        songs = songs.filter(song => {
-            return song.title !== "Deleted video"
-                && (!song.video.raw.status || song.video.raw.status.privacyStatus !== "private");
-        });
-        if (shard.isShuffle) {
-            songs = Utils.shuffleArray(songs);
-        }
+            let songs = await this.trackLoader.loadURL(url);
+            songs = songs.filter(song => {
+                return song.title !== "Deleted video"
+                    || ((song.video)
+                    && (song.video.raw)
+                    && (song.video.raw.status)
+                    && (song.video.raw.status.privacyStatus !== "private"));
+            });
+            if (shard.isShuffle) {
+                songs = Utils.shuffleArray(songs);
+            }
 
-        shard.queue = [ ... shard.queue, ... songs ];
+            shard.queue = [...shard.queue, ...songs];
 
-        if (instant || !shard.isPlaying) {
-            await this.play(guild, songs[0], channel);
+            if (instant || !shard.isPlaying) {
+                await this.play(guild, songs[0], channel);
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -90,7 +97,10 @@ class MusicManager {
             shard.isPaused = false;
             shard.queue = [];
             shard.currentSong = 0;
-            (await guild.fetchMember(this.client.user)).voiceChannel.leave();
+            let voiceChannel = (await guild.fetchMember(this.client.user)).voiceChannel;
+            if (voiceChannel) {
+                voiceChannel.leave();
+            }
             await this.client.user.setActivity(`🎵 on ${this.getActiveShards()} servers!`, { type: 'LISTENING' });
         } catch(e) {
             console.error(e);
@@ -176,6 +186,10 @@ class MusicManager {
 
     async search(guild, query) {
         return await this.trackLoader.search(query);
+    }
+
+    async searchPlaylist(guild, query) {
+        return await this.trackLoader.searchPlaylist(query);
     }
 
     togglePause(guild) {
