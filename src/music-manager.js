@@ -2,7 +2,6 @@ const ytdl = require("ytdl-core");
 const Utils = require("./utils");
 const LoopMode = require("./enums/loop-mode");
 const Shard = require("./shard");
-const fs = require("fs");
 
 class MusicManager {
     constructor(client, tokens) {
@@ -58,7 +57,7 @@ class MusicManager {
         let shard = this.getShard(guild);
 
         try {
-            console.log(`[${guild.name}] Playing: ${song.data.title}`);
+            console.log(`[${guild.name}] Playing: ${song.title}`);
 
             let connection;
             if (voiceChannel) {
