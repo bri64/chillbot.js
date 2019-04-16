@@ -70,8 +70,7 @@ class MusicManager {
             this.queue = [];
             this.currentSong = 0;
             this.currentVoiceChannel = null;
-            Utils.getCurrentVoiceChannels(this.client.user, guild)
-                .forEach(channel => channel.leave());
+            guild.fetchMember(this.client.user).voiceChannel.leave();
             await this.client.user.setStatus('idle');
             await this.client.user.setActivity('🎵 No Songs Playing', { type: "LISTENING" });
         } catch(e) {
@@ -195,7 +194,7 @@ class MusicManager {
         }
     }
 
-    async addToQueue(url, member, instant) {
+    async addToQueue(url, channel, instant) {
         let songs = await this.trackLoader.loadURL(url);
         songs = songs.filter(song => {
             return song.title !== "Deleted video"
@@ -208,7 +207,7 @@ class MusicManager {
         this.queue = [ ... this.queue, ... songs ];
 
         if (instant || !this.isPlaying) {
-            await this.play(songs[0], member.voiceChannel);
+            await this.play(songs[0], channel);
         }
     }
     
