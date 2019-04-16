@@ -13,6 +13,9 @@ class ClientHandler {
 
             this.client.on('ready', () => {
                 resolve(`Logged in as ${this.client.user.tag}!`);
+                setTimeout(async () => {
+                    await this.client.user.setActivity('🎵 No Songs Playing', { type: "LISTENING" });
+                });
             });
 
             this.client.login(this.token).catch((error) => {
