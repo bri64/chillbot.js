@@ -1,9 +1,10 @@
-const { RichEmbed } = require("discord.js");
+const {RichEmbed} = require("discord.js");
 
 const Command = require("./command");
 
 exports.CurrentCommand = class CurrentCommand extends Command {
-    async execute() {
+    async execute(params) {
+        await super.execute(params);
         try {
             let result = this.musicManager.getCurrentSong();
             this.msg.reply(new RichEmbed({
@@ -15,8 +16,12 @@ exports.CurrentCommand = class CurrentCommand extends Command {
                 }],
                 color: 0x00AAFF
             }));
-        } catch(e) {
+        } catch (e) {
             this.msg.reply("No songs in queue.");
         }
+    }
+
+    static aliases() {
+        return ["SONG", "NOWPLAYING", "CURRENT"];
     }
 };

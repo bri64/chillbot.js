@@ -1,4 +1,12 @@
 class Utils {
+    static getCurrentVoiceChannels(user, guild) {
+        return guild.channels
+            .filter(channel => channel.type === "voice")
+            .filter(channel => channel.members != null)
+            .filter(channel => channel.members.array().length > 0)
+            .filter(channel => channel.members.array().map(member => member.user).includes(user));
+    }
+
     static shuffleArray(array) {
         let currentIndex = array.length, temporaryValue, randomIndex;
 

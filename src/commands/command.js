@@ -1,7 +1,13 @@
 module.exports = class Command {
-    constructor(params) {
+    constructor(aliases) {
+        Object.assign(this, aliases);
+    }
+
+    async execute(params) {
         Object.assign(this, params);
     }
 
-    execute() {}
+    static aliases() {
+        return [];
+    }
 };

@@ -63,16 +63,15 @@ class MusicManager {
         }
     }
 
-    async stop() {
+    async stop(guild) {
         try {
             this.isPlaying = false;
             this.isPaused = false;
             this.queue = [];
             this.currentSong = 0;
-            if (this.currentVoiceChannel) {
-                this.currentVoiceChannel.leave();
-                this.currentVoiceChannel = null;
-            }
+            this.currentVoiceChannel = null;
+            Utils.getCurrentVoiceChannels(this.client.user, guild)
+                .forEach(channel => channel.leave());
             await this.client.user.setStatus('idle');
             await this.client.user.setActivity('🎵 No Songs Playing', { type: "LISTENING" });
         } catch(e) {

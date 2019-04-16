@@ -1,12 +1,18 @@
 const Command = require("./command");
 
 exports.VolumeCommand = class VolumeCommand extends Command {
-    async execute() {
+    async execute(params) {
+        await super.execute(params);
+        let volume = this.args[0];
         try {
-            let volume = (this.volume < 1) ? this.volume : (this.volume / 100);
-            this.musicManager.setVolume(volume);
-        } catch(e) {
+            let vol = (volume < 1) ? volume : (volume / 100);
+            this.musicManager.setVolume(vol);
+        } catch (e) {
             console.error(e);
         }
+    }
+
+    static aliases() {
+        return ["VOLUME", "SETVOLUME", "MUTE", "VOL"];
     }
 };
