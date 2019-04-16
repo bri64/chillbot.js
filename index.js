@@ -1,16 +1,22 @@
+const Config = require("./config");
+const fs = require("fs");
 const Discord = require("discord.js");
 const Client = new Discord.Client();
-const Config = require("./config");
-const ClientHandler = new (require("./components/client-handler"))(Client, Config.tokens.discord);
-const EventListener = new (require("./components/event-listener"))(Client);
+const ClientHandler = new (require("./src/client-handler"))(Client, Config.tokens.discord);
+const MusicManager = new (require("./src/music-manager"))(Client, Config.tokens);
+const CommandManager = new (require("./src/command-manager"))(MusicManager);
+const EventListener = new (require("./src/event-listener"))(Client, MusicManager, CommandManager);
 
-ClientHandler.setup().then((result) => {
-    console.info(result);
-    afterReady();
-}).catch((error) => {
-    console.error(error.message);
-});
+ClientHandler.setup()
+    .then((result) => {
+        console.info(result);
+        afterReady();
+    })
+    .catch((error) => {
+        console.error(error.message);
+    });
 
 let afterReady = () => {
     EventListener.init();
+    CommandManager.loadCommands(fs);
 };
