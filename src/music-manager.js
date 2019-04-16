@@ -1,7 +1,7 @@
 const ytdl = require("ytdl-core");
 const Utils = require("./utils");
-const Shard = require("./shard");
 const LoopMode = require("./enums/loop-mode");
+const Shard = require("./shard");
 
 class MusicManager {
     constructor(client, tokens) {
@@ -212,7 +212,7 @@ class MusicManager {
     toggleLoop(guild) {
         let shard = this.getShard(guild);
 
-        switch (this.loopMode) {
+        switch (shard.loopMode) {
             case LoopMode.NONE:
                 shard.loopMode = LoopMode.ALL;
                 break;
@@ -224,6 +224,13 @@ class MusicManager {
                 shard.loopMode = LoopMode.NONE;
                 break;
         }
+        return shard.loopMode;
+    }
+
+    setLoop(guild, loop) {
+        let shard = this.getShard(guild);
+
+        shard.loopMode = loop;
     }
 
     /* Status */
