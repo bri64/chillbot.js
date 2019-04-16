@@ -28,21 +28,28 @@ class MusicManager {
 
     /* Music */
     async addToQueue(guild, url, channel, instant) {
-        let shard = this.getShard(guild);
+        try {
+            let shard = this.getShard(guild);
 
-        let songs = await this.trackLoader.loadURL(url);
-        songs = songs.filter(song => {
-            return song.title !== "Deleted video"
-                && (!song.video.raw.status || song.video.raw.status.privacyStatus !== "private");
-        });
-        if (shard.isShuffle) {
-            songs = Utils.shuffleArray(songs);
-        }
+            let songs = await this.trackLoader.loadURL(url);
+            songs = songs.filter(song => {
+                return song.title !== "Deleted video"
+                    || ((song.video)
+                    && (song.video.raw)
+                    && (song.video.raw.status)
+                    && (song.video.raw.status.privacyStatus !== "private"));
+            });
+            if (shard.isShuffle) {
+                songs = Utils.shuffleArray(songs);
+            }
 
-        shard.queue = [ ... shard.queue, ... songs ];
+            shard.queue = [ ... shard.queue, ... songs ];
 
-        if (instant || !shard.isPlaying) {
-            await this.play(guild, songs[0], channel);
+            if (instant || !shard.isPlaying) {
+                await this.play(guild, songs[0], channel);
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -50,7 +57,7 @@ class MusicManager {
         let shard = this.getShard(guild);
 
         try {
-            console.log(`[${guild.name}] Playing: ${song.title}`);
+            console.log(`[${guild.name}] Playing: ${song.data.title}`);
 
             let connection;
             if (voiceChannel) {
@@ -69,12 +76,24 @@ class MusicManager {
                 liveBuffer: 5000
             };
 
-            shard.dispatcher = connection.playStream(ytdl(song.url, streamOptions))
-                .on("end", async (reason) => {
-                    if (reason != null) {
-                        await this.nextTrack(guild);
-                    }
-                }).on("error", (e) => console.error(e));
+            if (song.type === "YOUTUBE") {
+                shard.dispatcher = connection.playStream(ytdl(song.data.url, streamOptions))
+                    .on("end", async (reason) => {
+                        if (reason != null) {
+                            await this.nextTrack(guild);
+                        }
+                    }).on("error", (e) => console.error(e));
+            } else if (song.type === "SOUNDCLOUD") {
+                shard.dispatcher = connection.playStream(song.data.stream)
+                    .on("end", async (reason) => {
+                        if (reason != null) {
+                            await this.nextTrack(guild);
+                        }
+                    }).on("error", (e) => console.error(e));
+            } else {
+                throw new Error("Unknown track format!");
+            }
+
             shard.dispatcher.setVolumeLogarithmic(shard.volume);
             await this.client.user.setActivity(`🎵 on ${this.getActiveShards()} servers!`, { type: 'LISTENING' });
         } catch (e) {
