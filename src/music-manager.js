@@ -10,6 +10,7 @@ class MusicManager {
         this.shards = {};
     }
 
+    /* Shards */
     getShard(guild) {
         if (!this.shards[guild.id]) {
             this.shards[guild.id] = new Shard(guild);
@@ -19,6 +20,30 @@ class MusicManager {
 
     getActiveShards() {
         return (Object.keys(this.shards).filter(shard => this.shards[shard].hasSongs())).length;
+    }
+
+    async shutdown() {
+        await Object.keys(this.shards).forEach(async (shard) => await this.stop(this.shards[shard].guild));
+    }
+
+    /* Music */
+    async addToQueue(guild, url, channel, instant) {
+        let shard = this.getShard(guild);
+
+        let songs = await this.trackLoader.loadURL(url);
+        songs = songs.filter(song => {
+            return song.title !== "Deleted video"
+                && (!song.video.raw.status || song.video.raw.status.privacyStatus !== "private");
+        });
+        if (shard.isShuffle) {
+            songs = Utils.shuffleArray(songs);
+        }
+
+        shard.queue = [ ... shard.queue, ... songs ];
+
+        if (instant || !shard.isPlaying) {
+            await this.play(guild, songs[0], channel);
+        }
     }
 
     async play(guild, song, voiceChannel) {
@@ -54,22 +79,6 @@ class MusicManager {
             await this.client.user.setActivity(`🎵 on ${this.getActiveShards()} servers!`, { type: 'LISTENING' });
         } catch (e) {
             console.error(e);
-        }
-    }
-
-    togglePause(guild) {
-        let shard = this.getShard(guild);
-
-        if (shard.dispatcher) {
-            if (shard.isPaused) {
-                shard.isPaused = false;
-                shard.dispatcher.pause();
-            } else {
-                shard.isPaused = true;
-                shard.dispatcher.resume();
-            }
-        } else {
-            throw new Error();
         }
     }
 
@@ -169,34 +178,28 @@ class MusicManager {
         return await this.trackLoader.search(query);
     }
 
+    togglePause(guild) {
+        let shard = this.getShard(guild);
+
+        if (shard.dispatcher) {
+            if (shard.isPaused) {
+                shard.isPaused = false;
+                shard.dispatcher.pause();
+            } else {
+                shard.isPaused = true;
+                shard.dispatcher.resume();
+            }
+        } else {
+            throw new Error();
+        }
+    }
+
     setVolume(guild, volume) {
         let shard = this.getShard(guild);
 
         shard.volume = volume;
         if (shard.dispatcher) {
             shard.dispatcher.setVolumeLogarithmic(volume);
-        }
-    }
-
-    getCurrentSong(guild) {
-        let shard = this.getShard(guild);
-
-        if (shard.hasSongs()) {
-            return shard.queue[shard.currentSong];
-        } else {
-            throw new Error();
-        }
-    }
-
-    playlist(guild) {
-        let shard = this.getShard(guild);
-
-        if (shard.hasSongs()) {
-            let start = shard.currentSong + 1;
-            let end = start + 5;
-            return shard.queue.slice(start, (shard.queue.length >= end) ? end : shard.queue.length);
-        } else {
-            throw new Error();
         }
     }
 
@@ -223,22 +226,26 @@ class MusicManager {
         }
     }
 
-    async addToQueue(guild, url, channel, instant) {
+    /* Status */
+    getCurrentSong(guild) {
         let shard = this.getShard(guild);
 
-        let songs = await this.trackLoader.loadURL(url);
-        songs = songs.filter(song => {
-            return song.title !== "Deleted video"
-                && (!song.video.raw.status || song.video.raw.status.privacyStatus !== "private");
-        });
-        if (shard.isShuffle) {
-            songs = Utils.shuffleArray(songs);
+        if (shard.hasSongs()) {
+            return shard.queue[shard.currentSong];
+        } else {
+            throw new Error();
         }
+    }
 
-        shard.queue = [ ... shard.queue, ... songs ];
+    playlist(guild) {
+        let shard = this.getShard(guild);
 
-        if (instant || !shard.isPlaying) {
-            await this.play(guild, songs[0], channel);
+        if (shard.hasSongs()) {
+            let start = shard.currentSong + 1;
+            let end = start + 5;
+            return shard.queue.slice(start, (shard.queue.length >= end) ? end : shard.queue.length);
+        } else {
+            throw new Error();
         }
     }
 }
