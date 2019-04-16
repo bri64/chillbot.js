@@ -8,7 +8,7 @@ exports.PlayCommand = class PlayCommand extends Command {
         if (channel) {
             this.musicManager.addToQueue(this.guild, url, channel, this.command === "PLAY")
                 .catch(() => {
-                    this.msg.reply(`Failed to load ${url}!`);
+                    this.msg.reply(`Failed to load ${url}`);
                 });
         } else {
             this.msg.reply("You must be in a voice channel!");
