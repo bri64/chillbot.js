@@ -2,6 +2,7 @@ const ytdl = require("ytdl-core");
 const Utils = require("./utils");
 const LoopMode = require("./enums/loop-mode");
 const Shard = require("./shard");
+const fs = require("fs");
 
 class MusicManager {
     constructor(client, tokens) {
@@ -83,18 +84,24 @@ class MusicManager {
                             await this.nextTrack(guild);
                         }
                     }).on("error", (e) => console.error(e));
+                shard.dispatcher.setVolumeLogarithmic(shard.volume);
             } else if (song.type === "SOUNDCLOUD") {
-                shard.dispatcher = connection.playStream(song.data.stream)
-                    .on("end", async (reason) => {
-                        if (reason != null) {
-                            await this.nextTrack(guild);
-                        }
-                    }).on("error", (e) => console.error(e));
+                let stream = song.data.stream;
+                stream.pipe(fs.createWriteStream('tmp_buf_audio.mp3'))
+                    .on('end', () => {
+                        console.log("laoded");
+                        shard.dispatcher = connection.playStream(fs.createReadStream('tmp_buf_audio.mp3'))
+                            .on("end", async (reason) => {
+                                if (reason != null) {
+                                    await this.nextTrack(guild);
+                                }
+                            }).on("error", (e) => console.error(e));
+                        shard.dispatcher.setVolumeLogarithmic(shard.volume);
+                    });
             } else {
                 throw new Error("Unknown track format!");
             }
 
-            shard.dispatcher.setVolumeLogarithmic(shard.volume);
             await this.client.user.setActivity(`🎵 on ${this.getActiveShards()} servers!`, { type: 'LISTENING' });
         } catch (e) {
             console.error(e);
