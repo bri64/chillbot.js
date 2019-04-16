@@ -6,7 +6,7 @@ exports.StatusCommand = class StatusCommand extends Command {
     async execute(params) {
         await super.execute(params);
         try {
-            let results = await this.musicManager.playlist();
+            let results = await this.musicManager.playlist(this.guild);
             let fields = [];
             for (let result of results) {
                 fields.push({

@@ -1,25 +1,31 @@
 const ytdl = require("ytdl-core");
 const Utils = require("./utils");
+const Shard = require("./shard");
+const LoopMode = require("./enums/loop-mode");
 
 class MusicManager {
     constructor(client, tokens) {
         this.client = client;
-
         this.trackLoader = new (require("./track-loader"))(tokens);
-        this.queue = [];
-        this.currentSong = 0;
-        this.isPlaying = false;
-        this.isPaused = false;
-        this.isShuffle = true;
-        this.loopMode = LoopMode.ALL;
-        this.volume = 0.3;
-        this.dispatcher = null;
+        this.shards = {};
     }
 
+    getShard(guild) {
+        if (!this.shards[guild.id]) {
+            this.shards[guild.id] = new Shard(guild);
+        }
+        return this.shards[guild.id];
+    }
 
-    async play(song, guild, voiceChannel) {
+    getActiveShards() {
+        return (Object.keys(this.shards).filter(shard => this.shards[shard].hasSongs())).length;
+    }
+
+    async play(guild, song, voiceChannel) {
+        let shard = this.getShard(guild);
+
         try {
-            console.log("Playing: " + song.title);
+            console.log(`[${guild.name}] Playing: ${song.title}`);
 
             let connection;
             if (voiceChannel) {
@@ -28,38 +34,39 @@ class MusicManager {
                 connection = await (await guild.fetchMember(this.client.user)).voiceChannel.join();
             }
 
-            this.isPlaying = true;
-            this.isPaused = false;
-            this.currentSong = this.queue.indexOf(song);
+            shard.isPlaying = true;
+            shard.isPaused = false;
+            shard.currentSong = shard.queue.indexOf(song);
 
             let streamOptions = {
                 quality: "highestaudio",
                 filter: "audioonly",
-                liveBuffer: 50
+                liveBuffer: 5000
             };
 
-            this.dispatcher = connection.playStream(ytdl(song.url, streamOptions))
+            shard.dispatcher = connection.playStream(ytdl(song.url, streamOptions))
                 .on("end", async (reason) => {
                     if (reason != null) {
                         await this.nextTrack(guild);
                     }
                 }).on("error", (e) => console.error(e));
-            this.dispatcher.setVolumeLogarithmic(this.volume);
-            await this.client.user.setActivity(`🎵 ${song.title}`, { type: 'LISTENING' });
-            await this.client.user.setStatus('online');
+            shard.dispatcher.setVolumeLogarithmic(shard.volume);
+            await this.client.user.setActivity(`🎵 on ${this.getActiveShards()} servers!`, { type: 'LISTENING' });
         } catch (e) {
             console.error(e);
         }
     }
 
-    togglePause() {
-        if (this.dispatcher) {
-            if (this.isPaused) {
-                this.isPaused = false;
-                this.dispatcher.pause();
+    togglePause(guild) {
+        let shard = this.getShard(guild);
+
+        if (shard.dispatcher) {
+            if (shard.isPaused) {
+                shard.isPaused = false;
+                shard.dispatcher.pause();
             } else {
-                this.isPaused = true;
-                this.dispatcher.resume();
+                shard.isPaused = true;
+                shard.dispatcher.resume();
             }
         } else {
             throw new Error();
@@ -67,35 +74,38 @@ class MusicManager {
     }
 
     async stop(guild) {
+        let shard = this.getShard(guild);
+
         try {
-            this.isPlaying = false;
-            this.isPaused = false;
-            this.queue = [];
-            this.currentSong = 0;
+            shard.isPlaying = false;
+            shard.isPaused = false;
+            shard.queue = [];
+            shard.currentSong = 0;
             (await guild.fetchMember(this.client.user)).voiceChannel.leave();
-            await this.client.user.setStatus('idle');
-            await this.client.user.setActivity('🎵 No Songs Playing', { type: "LISTENING" });
+            await this.client.user.setActivity(`🎵 on ${this.getActiveShards()} servers!`, { type: 'LISTENING' });
         } catch(e) {
             console.error(e);
         }
     }
 
     async nextTrack(guild) {
-        if (this.activeQueue()) {
-            switch (this.loopMode) {
+        let shard = this.getShard(guild);
+
+        if (shard.hasSongs()) {
+            switch (shard.loopMode) {
                 case LoopMode.NONE:
-                    if (this.currentSong !== this.queue.length - 1) {
-                        await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], guild, null);
+                    if (shard.currentSong !== shard.queue.length - 1) {
+                        await this.play(guild, shard.queue[((shard.currentSong + 1) % shard.queue.length)], null);
                     } else {
-                        await this.stop();
+                        await this.stop(guild);
                     }
                     break;
                 case LoopMode.ALL:
-                    await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], guild, null);
+                    await this.play(guild, shard.queue[((shard.currentSong + 1) % shard.queue.length)], null);
                     break;
                 case LoopMode.ONE:
                 default:
-                    await this.play(this.queue[(this.currentSong)], guild, null);
+                    await this.play(guild, shard.queue[(shard.currentSong)], null);
                     break;
             }
         } else {
@@ -104,22 +114,24 @@ class MusicManager {
     }
 
     async prevTrack(guild) {
-        if (this.activeQueue()) {
-            let song = this.currentSong + this.queue.length;
-            switch (this.loopMode) {
+        let shard = this.getShard(guild);
+
+        if (shard.hasSongs()) {
+            let song = shard.currentSong + shard.queue.length;
+            switch (shard.loopMode) {
                 case LoopMode.NONE:
-                    if (this.currentSong !== 0) {
-                        await this.play(this.queue[((song - 1) % this.queue.length)], guild, null);
+                    if (shard.currentSong !== 0) {
+                        await this.play(guild, shard.queue[((song - 1) % shard.queue.length)], null);
                     } else {
-                        await this.play(this.queue[((song) % this.queue.length)], guild, null);
+                        await this.play(guild, shard.queue[((song) % shard.queue.length)], null);
                     }
                     break;
                 case LoopMode.ALL:
-                    await this.play(this.queue[((song - 1) % this.queue.length)], guild, null);
+                    await this.play(guild, shard.queue[((song - 1) % shard.queue.length)], null);
                     break;
                 case LoopMode.ONE:
                 default:
-                    await this.play(this.queue[((song) % this.queue.length)], guild, null);
+                    await this.play(guild, shard.queue[((song) % shard.queue.length)], null);
                     break;
             }
         } else {
@@ -127,11 +139,13 @@ class MusicManager {
         }
     }
     
-    async seek(query, guild) {
-        if (this.activeQueue()) {
-            let results = this.queue.filter(song => song.title.toUpperCase().includes(query.toUpperCase()));
+    async seek(guild, query) {
+        let shard = this.getShard(guild);
+
+        if (shard.hasSongs()) {
+            let results = shard.queue.filter(song => song.title.toUpperCase().includes(query.toUpperCase()));
             if (results.length > 0) {
-                await this.play(results[0], guild, null);
+                await this.play(guild, results[0], null);
             } else {
                 throw new Error();
             }
@@ -141,88 +155,92 @@ class MusicManager {
     }
 
     async shuffle(guild) {
-        if (this.activeQueue()) {
-            this.queue = Utils.shuffleArray(this.queue);
-            await this.play(this.queue[0], guild, null);
+        let shard = this.getShard(guild);
+
+        if (shard.hasSongs()) {
+            shard.queue = Utils.shuffleArray(shard.queue);
+            await this.play(guild, shard.queue[0], null);
         } else {
             throw new Error();
         }
     }
 
-    async search(query) {
+    async search(guild, query) {
         return await this.trackLoader.search(query);
     }
 
-    setVolume(volume) {
-        this.volume = volume;
-        if (this.dispatcher) {
-            this.dispatcher.setVolumeLogarithmic(volume);
+    setVolume(guild, volume) {
+        let shard = this.getShard(guild);
+
+        shard.volume = volume;
+        if (shard.dispatcher) {
+            shard.dispatcher.setVolumeLogarithmic(volume);
         }
     }
 
-    getCurrentSong() {
-        if (this.activeQueue()) {
-            return this.queue[this.currentSong];
+    getCurrentSong(guild) {
+        let shard = this.getShard(guild);
+
+        if (shard.hasSongs()) {
+            return shard.queue[shard.currentSong];
         } else {
             throw new Error();
         }
     }
 
-    playlist() {
-        if (this.activeQueue()) {
-            let start = this.currentSong + 1;
+    playlist(guild) {
+        let shard = this.getShard(guild);
+
+        if (shard.hasSongs()) {
+            let start = shard.currentSong + 1;
             let end = start + 5;
-            return this.queue.slice(start, (this.queue.length >= end) ? end : this.queue.length);
+            return shard.queue.slice(start, (shard.queue.length >= end) ? end : shard.queue.length);
         } else {
             throw new Error();
         }
     }
 
-    toggleShuffle(toggle) {
-        this.isShuffle = toggle;
+    toggleShuffle(guild, toggle) {
+        let shard = this.getShard(guild);
+
+        shard.isShuffle = toggle;
     }
 
-    toggleLoop() {
+    toggleLoop(guild) {
+        let shard = this.getShard(guild);
+
         switch (this.loopMode) {
             case LoopMode.NONE:
-                this.loopMode = LoopMode.ALL;
+                shard.loopMode = LoopMode.ALL;
                 break;
             case LoopMode.ALL:
-                this.loopMode = LoopMode.ONE;
+                shard.loopMode = LoopMode.ONE;
                 break;
             case LoopMode.ONE:
             default:
-                this.loopMode = LoopMode.NONE;
+                shard.loopMode = LoopMode.NONE;
                 break;
         }
     }
 
-    async addToQueue(url, guild, channel, instant) {
+    async addToQueue(guild, url, channel, instant) {
+        let shard = this.getShard(guild);
+
         let songs = await this.trackLoader.loadURL(url);
         songs = songs.filter(song => {
             return song.title !== "Deleted video"
                 && (!song.video.raw.status || song.video.raw.status.privacyStatus !== "private");
         });
-        if (this.isShuffle) {
+        if (shard.isShuffle) {
             songs = Utils.shuffleArray(songs);
         }
 
-        this.queue = [ ... this.queue, ... songs ];
+        shard.queue = [ ... shard.queue, ... songs ];
 
-        if (instant || !this.isPlaying) {
-            await this.play(songs[0], guild, channel);
+        if (instant || !shard.isPlaying) {
+            await this.play(guild, songs[0], channel);
         }
     }
-    
-    activeQueue() {
-        return (this.queue.length > 0);
-    }
 }
-
-const LoopMode = {
-    NONE: "NONE",
-    ALL: "ALL",
-    ONE: "ONE"
-};
 
 module.exports = MusicManager;

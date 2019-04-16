@@ -6,7 +6,7 @@ exports.VolumeCommand = class VolumeCommand extends Command {
         let volume = this.args[0];
         try {
             let vol = (volume < 1) ? volume : (volume / 100);
-            this.musicManager.setVolume(vol);
+            this.musicManager.setVolume(this.guild, vol);
         } catch (e) {
             console.error(e);
         }

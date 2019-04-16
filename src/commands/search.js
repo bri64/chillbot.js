@@ -7,7 +7,7 @@ exports.SearchCommand = class SearchCommand extends Command {
         await super.execute(params);
         let query = this.args.join(" ");
         try {
-            let results = await this.musicManager.search(query);
+            let results = await this.musicManager.search(this.guild, query);
             let fields = [];
             for (let result of results) {
                 fields.push({
