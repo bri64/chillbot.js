@@ -36,7 +36,9 @@ class CommandManager {
             } finally {
                 await command.execute({
                     msg,
+                    guild: msg.guild,
                     musicManager: this.musicManager,
+                    command: commandName,
                     args
                 });
             }

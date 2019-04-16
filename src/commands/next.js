@@ -4,7 +4,7 @@ exports.NextTrackCommand = class NextTrackCommand extends Command {
     async execute(params) {
         await super.execute(params);
         try {
-            await this.musicManager.nextTrack();
+            await this.musicManager.nextTrack(this.guild);
         } catch {
             this.msg.reply("No songs in queue.");
         }

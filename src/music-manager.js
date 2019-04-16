@@ -8,7 +8,6 @@ class MusicManager {
         this.trackLoader = new (require("./track-loader"))(tokens);
         this.queue = [];
         this.currentSong = 0;
-        this.currentVoiceChannel = null;
         this.isPlaying = false;
         this.isPaused = false;
         this.isShuffle = true;
@@ -18,12 +17,16 @@ class MusicManager {
     }
 
 
-    async play(song, voiceChannel) {
+    async play(song, guild, voiceChannel) {
         try {
             console.log("Playing: " + song.title);
 
-            this.currentVoiceChannel = voiceChannel;
-            let connection = await voiceChannel.join();
+            let connection;
+            if (voiceChannel) {
+                connection = await voiceChannel.join();
+            } else {
+                connection = await (await guild.fetchMember(this.client.user)).voiceChannel.join();
+            }
 
             this.isPlaying = true;
             this.isPaused = false;
@@ -38,7 +41,7 @@ class MusicManager {
             this.dispatcher = connection.playStream(ytdl(song.url, streamOptions))
                 .on("end", async (reason) => {
                     if (reason != null) {
-                        await this.nextTrack();
+                        await this.nextTrack(guild);
                     }
                 }).on("error", (e) => console.error(e));
             this.dispatcher.setVolumeLogarithmic(this.volume);
@@ -69,8 +72,7 @@ class MusicManager {
             this.isPaused = false;
             this.queue = [];
             this.currentSong = 0;
-            this.currentVoiceChannel = null;
-            guild.fetchMember(this.client.user).voiceChannel.leave();
+            (await guild.fetchMember(this.client.user)).voiceChannel.leave();
             await this.client.user.setStatus('idle');
             await this.client.user.setActivity('🎵 No Songs Playing', { type: "LISTENING" });
         } catch(e) {
@@ -78,22 +80,22 @@ class MusicManager {
         }
     }
 
-    async nextTrack() {
+    async nextTrack(guild) {
         if (this.activeQueue()) {
             switch (this.loopMode) {
                 case LoopMode.NONE:
                     if (this.currentSong !== this.queue.length - 1) {
-                        await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], this.currentVoiceChannel);
+                        await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], guild, null);
                     } else {
                         await this.stop();
                     }
                     break;
                 case LoopMode.ALL:
-                    await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], this.currentVoiceChannel);
+                    await this.play(this.queue[((this.currentSong + 1) % this.queue.length)], guild, null);
                     break;
                 case LoopMode.ONE:
                 default:
-                    await this.play(this.queue[(this.currentSong)], this.currentVoiceChannel);
+                    await this.play(this.queue[(this.currentSong)], guild, null);
                     break;
             }
         } else {
@@ -101,22 +103,23 @@ class MusicManager {
         }
     }
 
-    async prevTrack() {
+    async prevTrack(guild) {
         if (this.activeQueue()) {
+            let song = this.currentSong + this.queue.length;
             switch (this.loopMode) {
                 case LoopMode.NONE:
                     if (this.currentSong !== 0) {
-                        await this.play(this.queue[((this.currentSong - 1) % this.queue.length)], this.currentVoiceChannel);
+                        await this.play(this.queue[((song - 1) % this.queue.length)], guild, null);
                     } else {
-                        await this.play(this.queue[(this.currentSong)], this.currentVoiceChannel);
+                        await this.play(this.queue[((song) % this.queue.length)], guild, null);
                     }
                     break;
                 case LoopMode.ALL:
-                    await this.play(this.queue[((this.currentSong - 1) % this.queue.length)], this.currentVoiceChannel);
+                    await this.play(this.queue[((song - 1) % this.queue.length)], guild, null);
                     break;
                 case LoopMode.ONE:
                 default:
-                    await this.play(this.queue[(this.currentSong)], this.currentVoiceChannel);
+                    await this.play(this.queue[((song) % this.queue.length)], guild, null);
                     break;
             }
         } else {
@@ -124,11 +127,11 @@ class MusicManager {
         }
     }
     
-    async seek(query) {
+    async seek(query, guild) {
         if (this.activeQueue()) {
             let results = this.queue.filter(song => song.title.toUpperCase().includes(query.toUpperCase()));
             if (results.length > 0) {
-                await this.play(results[0], this.currentVoiceChannel);
+                await this.play(results[0], guild, null);
             } else {
                 throw new Error();
             }
@@ -137,10 +140,10 @@ class MusicManager {
         }
     }
 
-    async shuffle() {
+    async shuffle(guild) {
         if (this.activeQueue()) {
             this.queue = Utils.shuffleArray(this.queue);
-            await this.play(this.queue[0], this.currentVoiceChannel);
+            await this.play(this.queue[0], guild, null);
         } else {
             throw new Error();
         }
@@ -194,7 +197,7 @@ class MusicManager {
         }
     }
 
-    async addToQueue(url, channel, instant) {
+    async addToQueue(url, guild, channel, instant) {
         let songs = await this.trackLoader.loadURL(url);
         songs = songs.filter(song => {
             return song.title !== "Deleted video"
@@ -207,12 +210,12 @@ class MusicManager {
         this.queue = [ ... this.queue, ... songs ];
 
         if (instant || !this.isPlaying) {
-            await this.play(songs[0], channel);
+            await this.play(songs[0], guild, channel);
         }
     }
     
     activeQueue() {
-        return (this.currentVoiceChannel && this.queue.length > 0);
+        return (this.queue.length > 0);
     }
 }
 
