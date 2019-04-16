@@ -57,7 +57,7 @@ class MusicManager {
         let shard = this.getShard(guild);
 
         try {
-            console.log(`[${guild.name}] Playing: ${song.title}`);
+            console.log(`[${guild.name}] Playing: ${song.data.title}`);
 
             let connection;
             if (voiceChannel) {
@@ -76,12 +76,24 @@ class MusicManager {
                 liveBuffer: 5000
             };
 
-            shard.dispatcher = connection.playStream(ytdl(song.url, streamOptions))
-                .on("end", async (reason) => {
-                    if (reason != null) {
-                        await this.nextTrack(guild);
-                    }
-                }).on("error", (e) => console.error(e));
+            if (song.type === "YOUTUBE") {
+                shard.dispatcher = connection.playStream(ytdl(song.data.url, streamOptions))
+                    .on("end", async (reason) => {
+                        if (reason != null) {
+                            await this.nextTrack(guild);
+                        }
+                    }).on("error", (e) => console.error(e));
+            } else if (song.type === "SOUNDCLOUD") {
+                shard.dispatcher = connection.playStream(song.data.stream)
+                    .on("end", async (reason) => {
+                        if (reason != null) {
+                            await this.nextTrack(guild);
+                        }
+                    }).on("error", (e) => console.error(e));
+            } else {
+                throw new Error("Unknown track format!");
+            }
+
             shard.dispatcher.setVolumeLogarithmic(shard.volume);
             await this.client.user.setActivity(`🎵 on ${this.getActiveShards()} servers!`, { type: 'LISTENING' });
         } catch (e) {
