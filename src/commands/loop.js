@@ -22,4 +22,12 @@ exports.LoopCommand = class LoopCommand extends Command {
     static aliases() {
         return ["LOOP", "LOOPMODE", "SETLOOP", "TOGGLELOOP", "REPEAT"];
     }
+
+    static help() {
+        return {
+            name: "Toggle Loop",
+            description: "Toggles the loop mode or sets it to the specified mode.",
+            usage: "!loop [none|all|one]",
+        };
+    }
 };

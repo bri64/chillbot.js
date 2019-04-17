@@ -13,4 +13,12 @@ exports.PauseCommand = class PauseCommand extends Command {
     static aliases() {
         return ["PAUSE", "RESUME", "UNPAUSE"];
     }
+
+    static help() {
+        return {
+            name: "Pause",
+            description: "Pauses or resumes playback.",
+            usage: "!pause",
+        };
+    }
 };
