@@ -16,7 +16,7 @@ exports.ToggleShuffleCommand = class ToggleShuffleCommand extends Command {
     }
 
     static aliases() {
-        return ["TOGGLESHUFFLE", "SHUFFLETOGGLE", "SETSHUFFLE", "ISSHUFFLE"];
+        return ["TOGGLESHUFFLE", "SETSHUFFLE"];
     }
 
     static help() {

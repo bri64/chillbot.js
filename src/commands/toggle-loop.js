@@ -1,7 +1,7 @@
 const Command = require("./command");
 const LoopMode = require("../enums/loop-mode");
 
-exports.LoopCommand = class LoopCommand extends Command {
+exports.ToggleLoopCommand = class ToggleLoopCommand extends Command {
     async execute(params) {
         await super.execute(params);
 
