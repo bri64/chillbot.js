@@ -30,8 +30,8 @@ module.exports = {
 * `npm i`
 
 ### via GIT
-* <code>git clone https://github.com/bct8925/chillbot.js</code>
-* <code>cd ./chillbot.js</code>
+* `git clone https://github.com/bct8925/chillbot.js`
+* `cd ./chillbot.js`
 * `npm i`
 
 ## How to Start:
