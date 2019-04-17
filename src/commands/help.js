@@ -11,7 +11,7 @@ exports.HelpCommand = class HelpCommand extends Command {
         let Commands = this.Commands;
         let fields = [];
 
-        Object.keys(Commands).forEach((command) => {
+        Object.keys(Commands).sort().forEach((command) => {
             let help = Commands[command].help();
             if (help) {
                 fields.push({
