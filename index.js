@@ -12,7 +12,7 @@ const Discord = require("discord.js");
 const Client = new Discord.Client();
 const ClientHandler = new (require("./src/client-handler"))(Client, discord_token);
 const MusicManager = new (require("./src/music-manager"))(Client, Config.tokens);
-const CommandManager = new (require("./src/command-manager"))(MusicManager, command_prefix);
+const CommandManager = new (require("./src/command-manager"))(Client, MusicManager, command_prefix);
 const EventListener = new (require("./src/event-listener"))(Client, MusicManager, CommandManager);
 
 ClientHandler.setup()
