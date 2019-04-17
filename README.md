@@ -1,4 +1,4 @@
-#chillbot.js
+# chillbot.js
 > a pretty chill discord bot
 
 <img src="https://soundplate.com/wp-content/uploads/Chill.jpg" height="250" alt="credit: https://soundplate.com/electro-chill-house-debut-de-soiree-spotify-playlist-user-submitted/" />
