@@ -1,12 +1,13 @@
 class CommandManager {
-    constructor(musicManager) {
+    constructor(musicManager, command_prefix) {
         this.musicManager = musicManager;
+        this.prefix = command_prefix;
         this.commands = [];
     }
 
     async parseCommand(msg) {
         let message = msg.content;
-        if (message[0] === "!") {
+        if (message[0] === this.prefix) {
             let args = message.slice(1, message.length).split(" ");
             let commandName = args[0].toUpperCase();
             args = args.slice(1, args.length);
