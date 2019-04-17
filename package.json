@@ -8,7 +8,6 @@
   },
   "main": "index.js",
   "scripts": {
-    "install-dep": "npm install --global ffmpeg-binaries node-opus",
     "start": "node index"
   },
   "keywords": [],
@@ -17,6 +16,7 @@
   "dependencies": {
     "bufferutil": "^3.0.3",
     "discord.js": "^11.4.2",
+    "node-opus": "^0.2.7",
     "simple-youtube-api": "^5.1.1",
     "uws": "9.14.0",
     "ytdl-core": "^0.29.1",
