@@ -15,4 +15,12 @@ exports.VolumeCommand = class VolumeCommand extends Command {
     static aliases() {
         return ["VOLUME", "SETVOLUME", "MUTE", "VOL"];
     }
+
+    static help() {
+        return {
+            name: "Volume",
+            description: "Sets the volume.",
+            usage: '!volume (0.0-1.0|1-100)',
+        };
+    }
 };

@@ -10,4 +10,12 @@ exports.CoinCommand = class CoinCommand extends Command {
     static aliases() {
         return ["COIN", "FLIP", "HEADS", "TAILS"];
     }
+
+    static help() {
+        return {
+            name: "Coin",
+            description: "Tosses a coin!",
+            usage: "!coin",
+        };
+    }
 };

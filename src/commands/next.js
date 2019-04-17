@@ -13,4 +13,12 @@ exports.NextTrackCommand = class NextTrackCommand extends Command {
     static aliases() {
         return ["NEXT", "SKIP"];
     }
+
+    static help() {
+        return {
+            name: "Next Song",
+            description: "Plays the next song in the queue.",
+            usage: "!next",
+        };
+    }
 };
