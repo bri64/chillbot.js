@@ -8,8 +8,6 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "set": "npm remove ",
     "start": "node index"
   },
   "keywords": [],
@@ -18,15 +16,10 @@
   "dependencies": {
     "bufferutil": "^3.0.3",
     "discord.js": "^11.4.2",
-    "erlpack": "discordapp/erlpack",
-    "ffmpeg": "0.0.4",
-    "ffmpeg-binaries": "^4.0.0",
-    "libsodium-wrappers": "^0.7.4",
-    "node-fetch": "latest",
-    "opusscript": "^0.0.6",
-    "require-all": "^3.0.0",
+    "node-opus": "^0.2.7",
     "simple-youtube-api": "^5.1.1",
     "uws": "9.14.0",
-    "ytdl-core": "^0.29.1"
+    "ytdl-core": "^0.29.1",
+    "require-all": "^3.0.0"
   }
 }

@@ -44,7 +44,7 @@ class MusicManager {
                 songs = Utils.shuffleArray(songs);
             }
 
-            shard.queue = [ ... shard.queue, ... songs ];
+            shard.queue = [...shard.queue, ...songs];
 
             if (instant || !shard.isPlaying) {
                 await this.play(guild, songs[0], channel);
@@ -116,7 +116,10 @@ class MusicManager {
             shard.isPaused = false;
             shard.queue = [];
             shard.currentSong = 0;
-            (await guild.fetchMember(this.client.user)).voiceChannel.leave();
+            let voiceChannel = (await guild.fetchMember(this.client.user)).voiceChannel;
+            if (voiceChannel) {
+                voiceChannel.leave();
+            }
             await this.client.user.setActivity(`🎵 on ${this.getActiveShards()} servers!`, { type: 'LISTENING' });
         } catch(e) {
             console.error(e);
@@ -202,6 +205,10 @@ class MusicManager {
 
     async search(guild, query) {
         return await this.trackLoader.search(query);
+    }
+
+    async searchPlaylist(guild, query) {
+        return await this.trackLoader.searchPlaylist(query);
     }
 
     togglePause(guild) {

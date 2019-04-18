@@ -31,7 +31,7 @@ class TrackLoader {
             let playlist = await this.youtube.getPlaylist(url);
             let videos = await playlist.getVideos();
             console.info(`Loaded ${videos.length} videos.`);
-            return videos.map(video => TrackLoader.videoToSong(video));
+            return videos.map(video => TrackLoader.parseSong(video));
         } catch (e) {
             console.error(e);
         }
@@ -40,7 +40,7 @@ class TrackLoader {
     async loadTrack(url) {
         try {
             let video = await this.youtube.getVideo(url);
-            return [TrackLoader.videoToSong(video)];
+            return [TrackLoader.parseSong(video)];
         } catch (e) {
             console.error(e);
         }
@@ -71,13 +71,32 @@ class TrackLoader {
 
     async search(query) {
         try {
-            return (await this.youtube.searchVideos(query)).map(video => TrackLoader.videoToSong(video));
+            return (await this.youtube.searchVideos(query))
+                .map(video => TrackLoader.parseSong(video));
         } catch (e) {
             console.error(e);
         }
     }
 
-    static videoToSong(video) {
+    async searchPlaylist(query) {
+        try {
+            return (await this.youtube.searchPlaylists(query))
+                .map(playlist => TrackLoader.parsePlaylist(playlist));
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    static parsePlaylist(playlist) {
+        return {
+            id: playlist.id,
+            title: Util.escapeMarkdown(playlist.title),
+            author: playlist.channel.title,
+            url: `https://www.youtube.com/playlist?list=${playlist.id}`
+        };
+    }
+
+    static parseSong(video) {
         return {
             type: "YOUTUBE",
             data: {
