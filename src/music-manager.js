@@ -82,21 +82,22 @@ class MusicManager {
                         if (reason != null) {
                             await this.nextTrack(guild);
                         }
-                    }).on("error", (e) => console.error(e));
+                    })
+                    .on("error", (e) => console.error(e));
                 shard.dispatcher.setVolumeLogarithmic(shard.volume);
             } else if (song.type === "SOUNDCLOUD") {
                 let stream = song.data.stream;
-                stream.pipe(fs.createWriteStream('tmp_buf_audio.mp3'))
-                    .on('end', () => {
-                        console.log("laoded");
-                        shard.dispatcher = connection.playStream(fs.createReadStream('tmp_buf_audio.mp3'))
-                            .on("end", async (reason) => {
-                                if (reason != null) {
-                                    await this.nextTrack(guild);
-                                }
-                            }).on("error", (e) => console.error(e));
-                        shard.dispatcher.setVolumeLogarithmic(shard.volume);
-                    });
+                shard.dispatcher = connection.playArbitraryInput(stream, {})
+                    .on("start", () => {
+
+                    })
+                    .on("end", async (reason) => {
+                        if (reason != null) {
+                            await this.stop(guild);
+                        }
+                    })
+                    .on("error", (e) => console.error(e));
+                shard.dispatcher.setVolumeLogarithmic(shard.volume);
             } else {
                 throw new Error("Unknown track format!");
             }
