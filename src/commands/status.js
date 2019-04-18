@@ -26,6 +26,14 @@ exports.StatusCommand = class StatusCommand extends Command {
     }
 
     static aliases() {
-        return ["STATUS", "PLAYLIST"];
+        return ["UPNEXT", "STATUS", "PLAYLIST"];
+    }
+
+    static help() {
+        return {
+            name: "Up Next",
+            description: "Shows the next five songs in the queue.",
+            usage: "!upnext",
+        };
     }
 };

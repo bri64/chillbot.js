@@ -16,6 +16,14 @@ exports.ToggleShuffleCommand = class ToggleShuffleCommand extends Command {
     }
 
     static aliases() {
-        return ["TOGGLESHUFFLE", "SHUFFLETOGGLE", "SETSHUFFLE", "ISSHUFFLE"];
+        return ["TOGGLESHUFFLE", "SETSHUFFLE"];
+    }
+
+    static help() {
+        return {
+            name: "Toggle Shuffle",
+            description: "Toggles whether incoming playlists should be shuffled (default: true).",
+            usage: '!toggleshuffle (true,yes,on|false,no,off)',
+        };
     }
 };

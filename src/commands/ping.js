@@ -9,4 +9,12 @@ exports.PingCommand = class PingCommand extends Command {
     static aliases() {
         return ["PING"];
     }
+
+    static help() {
+        return {
+            name: "Ping",
+            description: "Pong!",
+            usage: "!ping",
+        };
+    }
 };
