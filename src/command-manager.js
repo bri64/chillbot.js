@@ -1,50 +1,45 @@
 class CommandManager {
-    constructor(client, musicManager, command_prefix) {
+    constructor(client, musicManager, prefix) {
         this.client = client;
         this.musicManager = musicManager;
-        this.prefix = command_prefix;
-        this.commands = [];
+        this.prefix = prefix;
+        this.macroCommands = [];
     }
 
     async parseCommand(msg) {
+        let command;
         let message = msg.content;
         let isMentioned = msg.isMentioned(this.client.user);
-        if (isMentioned || message[0] === this.prefix) {
+        if (isMentioned) {
+            command = new Commands.HelpCommand({ Commands: Commands });
+            await command.execute({
+                msg,
+                guild: msg.guild,
+                Commands: Commands
+            });
+        } else if (message[0] === this.prefix) {
             let args = message.slice(1, message.length).split(" ");
             let commandName = args[0].toUpperCase();
             args = args.slice(1, args.length);
-            let command;
 
             try {
-
-                if (isMentioned) {
-                    command = new Commands.HelpCommand({ Commands: Commands });
-                } else {
-                    for (let cmd of Object.keys(Commands)) {
-                        let validCommand = Commands[cmd].aliases && Commands[cmd].aliases().includes(commandName);
-                        if (validCommand) {
-                            // Help command is special
-                            let isHelpCommand = Commands.HelpCommand.aliases().includes(commandName);
-                            if (isHelpCommand) {
-                                command = new Commands.HelpCommand({ Commands: Commands });
-                            } else {
-                                command = new Commands[cmd]();
-                            }
-                            break;
-                        }
-                    }
-                    if (!command) {
-                        let otherCmd = this.commands[commandName];
-                        if (otherCmd) {
-                            command = new Commands.PlayCommand();
-                            args = [ otherCmd ];
-                        } else {
-                            command = new Commands.ErrorCommand();
-                            args = [ "Unknown Command" ];
-                        }
+                for (let cmd of Object.keys(Commands)) {
+                    let validCommand = Commands[cmd].aliases && Commands[cmd].aliases().includes(commandName);
+                    if (validCommand) {
+                        command = new Commands[cmd]();
+                        break;
                     }
                 }
-
+                if (!command) {
+                    let macroCommand = this.macroCommands[commandName];
+                    if (macroCommand) {
+                        command = new Commands.PlayCommand();
+                        args = [ macroCommand ];
+                    } else {
+                        command = new Commands.ErrorCommand();
+                        args = [ "Unknown Command" ];
+                    }
+                }
             } catch (e) {
                 console.error(e);
                 command = new Commands.ErrorCommand();
@@ -55,6 +50,7 @@ class CommandManager {
                     guild: msg.guild,
                     musicManager: this.musicManager,
                     command: commandName,
+                    Commands: Commands,
                     args
                 });
             }
@@ -62,20 +58,14 @@ class CommandManager {
     }
 
     loadCommands(fs) {
-        // Load pre-defined commands
-        const definedCommands = "cmd-db.json";
-        const contentsJSON = fs.readFileSync(`./src/commands/${definedCommands}`);
-        this.commands = JSON.parse(contentsJSON);
+        // Load macro commands
+        const definedCommands = "macros.json";
+        const contentsJSON = fs.readFileSync(`./${definedCommands}`);
+        this.macroCommands = JSON.parse(contentsJSON);
 
         // Dynamically load commands from ./commands
         let allCommands = Object.values((require('require-all')(__dirname + '/commands')));
         Commands = allCommands.reduce((tmp, item) => ({ ... tmp, ...item }));
-
-        // Filter out invalid commands
-        Object.keys(Commands)
-            .filter(cmd => Object.keys(this.commands).includes(cmd))
-            .forEach((cmd) => delete Commands[cmd]);
-
     }
 }
 
