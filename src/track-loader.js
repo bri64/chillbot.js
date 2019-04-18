@@ -1,9 +1,11 @@
 const { Util } = require("discord.js");
 const YouTube = require('simple-youtube-api');
 const fetch = require('node-fetch');
+
 class TrackLoader {
     constructor(tokens) {
         this.youtube = new YouTube(tokens.youtube);
+        this.soundcloud_token = tokens.soundcloud;
     }
 
     async loadURL(url) {
@@ -47,21 +49,17 @@ class TrackLoader {
     }
 
     async loadSoundcloudTrack(url) {
-        console.log("soundlaod");
-        let infoRequest = `http://api.soundcloud.com/resolve.json?url=${url}&client_id=71dfa98f05fa01cb3ded3265b9672aaf`;
-        let result = await fetch(infoRequest);
+        let result = await fetch(`http://api.soundcloud.com/resolve.json?url=${url}&client_id=${this.soundcloud_token}`);
         try {
             let info = await result.json();
-            let trackRequest = `http://api.soundcloud.com/tracks/${info.id}/stream?consumer_key=71dfa98f05fa01cb3ded3265b9672aaf`;
-            let stream = await fetch(trackRequest);
             return [{
                 type: "SOUNDCLOUD",
                 data: {
-                    stream: stream.body,
+                    stream: `http://api.soundcloud.com/tracks/${info.id}/stream?client_id=${this.soundcloud_token}`,
                     id: info.id,
                     title: Util.escapeMarkdown(info.title),
                     author: info.user.username,
-                    url: info.permalink_url
+                    url
                 }
             }];
         } catch (e) {
