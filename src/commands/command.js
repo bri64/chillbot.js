@@ -10,4 +10,12 @@ module.exports = class Command {
     static aliases() {
         return [];
     }
+
+    static help() {
+        return {
+            name: this.aliases().length > 0 && this.aliases()[0],
+            description: 'No Description.',
+            usage: 'No Usage Defined!',
+        };
+    }
 };
