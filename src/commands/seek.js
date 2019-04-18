@@ -14,4 +14,12 @@ exports.SeekCommand = class SeekCommand extends Command {
     static aliases() {
         return ["SEEK", "FIND", "GOTO"];
     }
+
+    static help() {
+        return {
+            name: "Seek",
+            description: "Skips to the specified song in the queue if it exists.",
+            usage: "!seek QUERY",
+        };
+    }
 };

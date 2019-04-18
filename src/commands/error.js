@@ -6,4 +6,8 @@ exports.ErrorCommand = class ErrorCommand extends Command {
         let error = this.args[0];
         this.msg.reply(error);
     }
+
+    static help() {
+        return null;
+    }
 };
