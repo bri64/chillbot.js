@@ -1,5 +1,4 @@
-
-class ClientHandler {
+module.exports = class ClientHandler {
     constructor(client, token) {
         this.client = client;
         this.token = token;
@@ -23,7 +22,4 @@ class ClientHandler {
             });
         });
     }
-}
-
-module.exports = ClientHandler;
-
+};

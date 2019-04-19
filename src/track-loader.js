@@ -1,13 +1,36 @@
 const { Util } = require("discord.js");
 const YouTube = require('simple-youtube-api');
+const ytdl = require("ytdl-core");
+const fetch = require('node-fetch');
 
-class TrackLoader {
+const streamOptions = {
+    quality: "highestaudio",
+    filter: "audioonly",
+    liveBuffer: 5000
+};
+
+module.exports = class TrackLoader {
     constructor(tokens) {
-        this.tokens = tokens;
         this.youtube = new YouTube(tokens.youtube);
+        this.soundcloud_token = tokens.soundcloud;
+    }
+
+    async getStream(url) {
+        return await ytdl(url, streamOptions);
     }
 
     async loadURL(url) {
+        let songURL = url.toLowerCase();
+        if (songURL.includes("youtube") || songURL.includes("youtu.be")) {
+            return this.loadYouTubeURL(url);
+        } else if (songURL.includes("soundcloud")) {
+            return this.loadSoundcloudTrack(url);
+        } else {
+            throw new Error("Unknown URL format!");
+        }
+    }
+
+    async loadYouTubeURL(url) {
         let isPlaylist = url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist.*$/);
         if (isPlaylist) {
             return await this.loadPlaylist(url);
@@ -30,10 +53,52 @@ class TrackLoader {
     async loadTrack(url) {
         try {
             let video = await this.youtube.getVideo(url);
+            console.info(`Loaded 1 video.`);
             return [TrackLoader.parseSong(video)];
         } catch (e) {
             console.error(e);
         }
+    }
+
+    async loadSoundcloudTrack(url) {
+        let result = await fetch(`http://api.soundcloud.com/resolve.json?url=${url}&client_id=${this.soundcloud_token}`);
+        try {
+            let info = await result.json();
+            return [{
+                type: "SOUNDCLOUD",
+                data: {
+                    stream: `http://api.soundcloud.com/tracks/${info.id}/stream?client_id=${this.soundcloud_token}`,
+                    id: info.id,
+                    title: Util.escapeMarkdown(info.title),
+                    author: info.user.username,
+                    url
+                }
+            }];
+        } catch (e) {
+            throw new Error(e);
+        }
+    }
+
+    static parseSong(video) {
+        return {
+            type: "YOUTUBE",
+            data: {
+                id: video.id,
+                title: Util.escapeMarkdown(video.title),
+                author: video.channel.title,
+                url: `https://www.youtube.com/watch?v=${video.id}`,
+                video: video
+            }
+        };
+    }
+
+    static parsePlaylist(playlist) {
+        return {
+            id: playlist.id,
+            title: Util.escapeMarkdown(playlist.title),
+            author: playlist.channel.title,
+            url: `https://www.youtube.com/playlist?list=${playlist.id}`
+        };
     }
 
     async search(query) {
@@ -53,26 +118,4 @@ class TrackLoader {
             console.error(e);
         }
     }
-
-    static parsePlaylist(playlist) {
-        return {
-            id: playlist.id,
-            title: Util.escapeMarkdown(playlist.title),
-            author: playlist.channel.title,
-            url: `https://www.youtube.com/playlist?list=${playlist.id}`
-        };
-    }
-
-    static parseSong(video) {
-        return {
-            id: video.id,
-            title: Util.escapeMarkdown(video.title),
-            author: video.channel.title,
-            url: `https://www.youtube.com/watch?v=${video.id}`,
-            video: video
-        };
-    }
-
-}
-
-module.exports = TrackLoader;
+};
