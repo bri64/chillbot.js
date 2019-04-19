@@ -11,9 +11,9 @@ if (process.argv.length > 2 && process.argv[2] === "test") {
 const Discord = require("discord.js");
 const Client = new Discord.Client();
 const ClientHandler = new (require("./src/client-handler"))(Client, discord_token);
-const MusicManager = new (require("./src/music-manager"))(Client, Config.tokens);
-const CommandManager = new (require("./src/command-manager"))(Client, MusicManager, command_prefix);
-const EventListener = new (require("./src/event-listener"))(Client, MusicManager, CommandManager);
+const ShardManager = new (require("./src/shard-manager"))(Client, Config.tokens);
+const CommandManager = new (require("./src/command-manager"))(Client, ShardManager, command_prefix);
+const EventListener = new (require("./src/event-listener"))(Client, ShardManager, CommandManager);
 
 ClientHandler.setup()
     .then((result) => {
@@ -31,7 +31,7 @@ let afterReady = () => {
 
 process.on('SIGINT', async () => {
    console.info("Shutting down...");
-   await MusicManager.shutdown();
+   await ShardManager.shutdown();
    console.info("Goodbye!");
    process.exit(0);
 });

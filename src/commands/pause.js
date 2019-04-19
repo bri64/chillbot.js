@@ -4,7 +4,7 @@ exports.PauseCommand = class PauseCommand extends Command {
     async execute(params) {
         await super.execute(params);
         try {
-            this.musicManager.togglePause(this.guild);
+            await this.shardManager.pause(this.guild);
         } catch {
             this.msg.reply("No songs in queue.");
         }
