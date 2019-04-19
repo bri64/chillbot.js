@@ -1,11 +1,22 @@
 const { Util } = require("discord.js");
 const YouTube = require('simple-youtube-api');
+const ytdl = require("ytdl-core");
 const fetch = require('node-fetch');
 
-class TrackLoader {
+const streamOptions = {
+    quality: "highestaudio",
+    filter: "audioonly",
+    liveBuffer: 5000
+};
+
+module.exports = class TrackLoader {
     constructor(tokens) {
         this.youtube = new YouTube(tokens.youtube);
         this.soundcloud_token = tokens.soundcloud;
+    }
+
+    async getStream(url) {
+        return await ytdl(url, streamOptions);
     }
 
     async loadURL(url) {
@@ -107,6 +118,4 @@ class TrackLoader {
         };
     }
 
-}
-
-module.exports = TrackLoader;
+};
