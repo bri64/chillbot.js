@@ -1,5 +1,5 @@
-class EventListener {
-    constructor(client, musicManager, commandManager) {
+module.exports = class EventListener {
+    constructor(client, shardManager, commandManager) {
         this.client = client;
         this.commandManager = commandManager;
     }
@@ -12,6 +12,4 @@ class EventListener {
 
         // Other
     }
-}
-
-module.exports = EventListener;
+};

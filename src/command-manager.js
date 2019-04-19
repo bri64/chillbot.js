@@ -1,7 +1,8 @@
-class CommandManager {
-    constructor(client, musicManager, prefix) {
+let Commands = {};
+module.exports = class CommandManager {
+    constructor(client, shardManager, prefix) {
         this.client = client;
-        this.musicManager = musicManager;
+        this.shardManager = shardManager;
         this.prefix = prefix;
         this.macroCommands = [];
     }
@@ -48,7 +49,7 @@ class CommandManager {
                 await command.execute({
                     msg,
                     guild: msg.guild,
-                    musicManager: this.musicManager,
+                    shardManager: this.shardManager,
                     command: commandName,
                     Commands: Commands,
                     args
@@ -67,7 +68,4 @@ class CommandManager {
         let allCommands = Object.values((require('require-all')(__dirname + '/commands')));
         Commands = allCommands.reduce((tmp, item) => ({ ... tmp, ...item }));
     }
-}
-
-let Commands = {};
-module.exports = CommandManager;
+};

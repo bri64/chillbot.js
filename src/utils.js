@@ -1,4 +1,4 @@
-class Utils {
+module.exports = class Utils {
     static shuffleArray(array) {
         let currentIndex = array.length, temporaryValue, randomIndex;
 
@@ -17,6 +17,4 @@ class Utils {
 
         return array;
     }
-}
-
-module.exports = Utils;
+};

@@ -4,7 +4,7 @@ exports.ShuffleCommand = class ShuffleCommand extends Command {
     async execute(params) {
         await super.execute(params);
         try {
-            await this.musicManager.shuffle(this.guild);
+            await this.shardManager.shuffle(this.guild);
         } catch {
             this.msg.reply("No songs in queue.");
         }
