@@ -70,7 +70,7 @@ module.exports = class ShardManager {
     }
 
     async setVolume(guild, volume) {
-        await this.getShard(guild).volume(volume);
+        await this.getShard(guild).setVolume(volume);
     }
 
     /* Searching */

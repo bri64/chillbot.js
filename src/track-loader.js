@@ -53,6 +53,7 @@ module.exports = class TrackLoader {
     async loadTrack(url) {
         try {
             let video = await this.youtube.getVideo(url);
+            console.info(`Loaded 1 video.`);
             return [TrackLoader.parseSong(video)];
         } catch (e) {
             console.error(e);
@@ -78,6 +79,28 @@ module.exports = class TrackLoader {
         }
     }
 
+    static parseSong(video) {
+        return {
+            type: "YOUTUBE",
+            data: {
+                id: video.id,
+                title: Util.escapeMarkdown(video.title),
+                author: video.channel.title,
+                url: `https://www.youtube.com/watch?v=${video.id}`,
+                video: video
+            }
+        };
+    }
+
+    static parsePlaylist(playlist) {
+        return {
+            id: playlist.id,
+            title: Util.escapeMarkdown(playlist.title),
+            author: playlist.channel.title,
+            url: `https://www.youtube.com/playlist?list=${playlist.id}`
+        };
+    }
+
     async search(query) {
         try {
             return (await this.youtube.searchVideos(query))
@@ -95,27 +118,4 @@ module.exports = class TrackLoader {
             console.error(e);
         }
     }
-
-    static parsePlaylist(playlist) {
-        return {
-            id: playlist.id,
-            title: Util.escapeMarkdown(playlist.title),
-            author: playlist.channel.title,
-            url: `https://www.youtube.com/playlist?list=${playlist.id}`
-        };
-    }
-
-    static parseSong(video) {
-        return {
-            type: "YOUTUBE",
-            data: {
-                id: video.id,
-                title: Util.escapeMarkdown(video.title),
-                author: video.channel.title,
-                url: `https://www.youtube.com/watch?v=${video.id}`,
-                video: video
-            }
-        };
-    }
-
 };
