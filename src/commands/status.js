@@ -6,12 +6,12 @@ exports.StatusCommand = class StatusCommand extends Command {
     async execute(params) {
         await super.execute(params);
         try {
-            let results = await this.shardManager.playlist(this.guild);
+            let results = await this.shardManager.getPlaylist(this.guild);
             let fields = [];
             for (let result of results) {
                 fields.push({
-                    name: result.title,
-                    value: result.url,
+                    name: result.data.title,
+                    value: result.data.url,
                     inline: true
                 });
             }

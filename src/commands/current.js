@@ -6,7 +6,7 @@ exports.CurrentCommand = class CurrentCommand extends Command {
     async execute(params) {
         await super.execute(params);
         try {
-            let result = await this.shardManager.currentSong(this.guild);
+            let result = (await this.shardManager.getCurrentSong(this.guild)).data;
             this.msg.reply(new RichEmbed({
                 title: `Current Song:`,
                 fields: [{
