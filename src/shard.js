@@ -25,8 +25,8 @@ module.exports = class Shard {
         try {
             let songs = await this.trackLoader.loadURL(url);
             songs = songs.filter(song =>
-                song.title.toUpperCase() !== "DELETED VIDEO"
-                && song.title.toUpperCase() !== "PRIVATE VIDEO");
+                song.data.title.toUpperCase() !== "DELETED VIDEO"
+                && song.data.title.toUpperCase() !== "PRIVATE VIDEO");
             if (this.isShuffle) {
                 songs = Utils.shuffleArray(songs);
             }
@@ -57,7 +57,7 @@ module.exports = class Shard {
             this.currentSong = this.queue.indexOf(song);
 
             if (song.type === "YOUTUBE") {
-                this.dispatcher = connection.playStream(this.trackLoader.getStream(song.data.url))
+                this.dispatcher = connection.playStream(await this.trackLoader.getStream(song.data.url))
                     .on("end", async (reason) => {
                         if (reason != null) {
                             await this.nextTrack();
@@ -207,7 +207,7 @@ module.exports = class Shard {
         return this.loopMode;
     }
 
-    async volume(volume) {
+    async setVolume(volume) {
         this.volume = volume;
         if (this.dispatcher) {
             this.dispatcher.setVolumeLogarithmic(volume);
