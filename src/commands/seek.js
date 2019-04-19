@@ -5,7 +5,7 @@ exports.SeekCommand = class SeekCommand extends Command {
         await super.execute(params);
         let query = this.args.join(" ");
         try {
-            await this.musicManager.seek(this.guild, query);
+            await this.shardManager.seek(this.guild, query);
         } catch {
             this.msg.reply(`No results found for '${query}'.`);
         }

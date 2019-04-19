@@ -20,9 +20,9 @@ exports.SearchCommand = class SearchCommand extends Command {
             let fields = [];
             let results = [];
             if (isPlaylist) {
-                results = await this.musicManager.searchPlaylist(this.guild, query);
+                results = await this.shardManager.searchPlaylist(this.guild, query);
             } else {
-                results = await this.musicManager.search(this.guild, query);
+                results = await this.shardManager.search(this.guild, query);
             }
             results.forEach(result => {
                 fields.push({
