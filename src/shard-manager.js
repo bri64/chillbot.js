@@ -85,11 +85,11 @@ module.exports = class ShardManager {
     }
 
     /* Status */
-    async currentSong(guild) {
-        await this.getShard(guild).currentSong();
+    async getCurrentSong(guild) {
+        return await this.getShard(guild).getCurrentSong();
     }
 
-    async playlist(guild) {
-        await this.getShard(guild).playlist();
+    async getPlaylist(guild) {
+        return await this.getShard(guild).getPlaylist();
     }
 };

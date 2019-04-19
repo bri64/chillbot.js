@@ -215,7 +215,7 @@ module.exports = class Shard {
     }
 
     /* Status */
-    async currentSong() {
+    async getCurrentSong() {
         if (this.hasSongs()) {
             return this.queue[this.currentSong];
         } else {
@@ -223,11 +223,15 @@ module.exports = class Shard {
         }
     }
 
-    async playlist() {
+    async getPlaylist() {
         if (this.hasSongs()) {
-            let start = this.currentSong + 1;
-            let end = start + 5;
-            return this.queue.slice(start, (this.queue.length >= end) ? end : this.queue.length);
+            let start = this.currentSong + this.queue.length + 1;
+            let amt = (this.queue.length > 5) ? 5 : this.queue.length - 1;
+            let results = [];
+            for (let i = 0; i < amt; i++) {
+                results.push(this.queue[((start + i) % this.queue.length)])
+            }
+            return results;
         } else {
             throw new Error();
         }
