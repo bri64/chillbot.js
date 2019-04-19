@@ -18,4 +18,12 @@ exports.PlayCommand = class PlayCommand extends Command {
     static aliases() {
         return ["PLAY", "ADD", "QUEUE"];
     }
+
+    static help() {
+        return {
+            name: "Play",
+            description: "Queues the song/playlist given, starts immediately.",
+            usage: "!play URL",
+        };
+    }
 };

@@ -11,6 +11,14 @@ exports.PrevTrackCommand = class PrevTrackCommand extends Command {
     }
 
     static aliases() {
-        return ["BACK", "PREV"];
+        return ["PREV", "BACK"];
+    }
+
+    static help() {
+        return {
+            name: "Previous Song",
+            description: "Plays the previous song in the queue.",
+            usage: "!prev",
+        };
     }
 };

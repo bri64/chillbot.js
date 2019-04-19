@@ -13,4 +13,12 @@ exports.ShuffleCommand = class ShuffleCommand extends Command {
     static aliases() {
         return ["SHUFFLE", "RANDOM"];
     }
+
+    static help() {
+        return {
+            name: "Shuffle",
+            description: "Shuffles the queue and plays the new first song.",
+            usage: "!shuffle",
+        };
+    }
 };

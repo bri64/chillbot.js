@@ -44,4 +44,12 @@ exports.SearchCommand = class SearchCommand extends Command {
     static aliases() {
         return ["SEARCH", "YOUTUBE", "LOOKUP"];
     }
+
+    static help() {
+        return {
+            name: "Search",
+            description: "Searches YouTube for videos/playlists.",
+            usage: "!search [playlist] QUERY",
+        };
+    }
 };
