@@ -72,7 +72,7 @@ module.exports = class Shard {
                     })
                     .on("end", async (reason) => {
                         if (reason != null) {
-                            await this.stop();
+                            await this.nextTrack();
                         }
                     })
                     .on("error", (e) => console.error(e));
@@ -149,11 +149,11 @@ module.exports = class Shard {
 
     async pause() {
         if (this.dispatcher) {
-            if (this.isPaused) {
-                this.isPaused = false;
+            if (!this.isPaused) {
+                this.isPaused = true;
                 this.dispatcher.pause();
             } else {
-                this.isPaused = true;
+                this.isPaused = false;
                 this.dispatcher.resume();
             }
         } else {

@@ -46,7 +46,9 @@ module.exports = class ShardManager {
     }
 
     async pause(guild) {
-        await this.getShard(guild).pause();
+        setTimeout(async () => {
+            await this.getShard(guild).pause()
+        });
     }
     
     async seek(guild, query) {
