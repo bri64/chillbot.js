@@ -22,6 +22,14 @@ exports.CurrentCommand = class CurrentCommand extends Command {
     }
 
     static aliases() {
-        return ["SONG", "NOWPLAYING", "CURRENT"];
+        return ["CURRENT", "SONG", "NOWPLAYING"];
+    }
+
+    static help() {
+        return {
+            name: "Current Song",
+            description: "Displays the current playing song.",
+            usage: "!current",
+        };
     }
 };

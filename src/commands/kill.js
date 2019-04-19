@@ -9,4 +9,12 @@ exports.KillCommand = class KillCommand extends Command {
     static aliases() {
         return ["KILL", "STOP"];
     }
+
+    static help() {
+        return {
+            name: "Kill",
+            description: "Clears the queue and leaves the channel.",
+            usage: "!kill",
+        };
+    }
 };

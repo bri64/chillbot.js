@@ -8,6 +8,7 @@
   },
   "main": "index.js",
   "scripts": {
+    "test": "node index test",
     "start": "node index"
   },
   "keywords": [],
