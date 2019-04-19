@@ -17,7 +17,9 @@
 module.exports = {
     tokens: {
         discord: "DISCORD_BOT_TOKEN",
-        youtube: "YOUTUBE_API_KEY"
+        discord_test: "DISCORD_BOT_TOKEN",
+        youtube: "YOUTUBE_API_KEY",
+        soundcloud: "SOUNDCLOUD_API_KEY"
     }
 };
 ```
