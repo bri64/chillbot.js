@@ -101,18 +101,18 @@ module.exports = class TrackLoader {
         };
     }
 
-    async search(query) {
+    async search(query, limit) {
         try {
-            return (await this.youtube.searchVideos(query, 50))
+            return (await this.youtube.searchVideos(query, limit))
                 .map(video => TrackLoader.parseSong(video));
         } catch (e) {
             console.error(e);
         }
     }
 
-    async searchPlaylist(query) {
+    async searchPlaylist(query, limit) {
         try {
-            return (await this.youtube.searchPlaylists(query, 50))
+            return (await this.youtube.searchPlaylists(query, limit))
                 .map(playlist => TrackLoader.parsePlaylist(playlist));
         } catch (e) {
             console.error(e);

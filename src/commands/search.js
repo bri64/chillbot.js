@@ -53,8 +53,8 @@ exports.SearchCommand = class SearchCommand extends Command {
         let results = (prevResults != null)
             ? prevResults
             : ((isPlaylist)
-                ? await this.shardManager.searchPlaylist(query)
-                : await this.shardManager.search(query));
+                ? await this.shardManager.searchPlaylist(query, MAX_RESULTS)
+                : await this.shardManager.search(query, MAX_RESULTS));
         let pagedResults = results.slice((page * PAGE_SIZE) - PAGE_SIZE, page * PAGE_SIZE);
         let fields = [];
         pagedResults.forEach(result => {

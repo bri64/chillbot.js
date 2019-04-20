@@ -76,12 +76,12 @@ module.exports = class ShardManager {
     }
 
     /* Searching */
-    async search(query) {
-        return await this.trackLoader.search(query);
+    async search(query, limit) {
+        return await this.trackLoader.search(query, limit);
     }
 
-    async searchPlaylist(query) {
-        return await this.trackLoader.searchPlaylist(query);
+    async searchPlaylist(query, limit) {
+        return await this.trackLoader.searchPlaylist(query, limit);
     }
 
     /* Status */
