@@ -9,8 +9,6 @@ module.exports = class Shard {
 
         this.queue = [];
         this.currentSong = 0;
-        this.isPlaying = false;
-        this.isPaused = false;
         this.isShuffle = true;
         this.loopMode = LoopMode.ALL;
         this.volume = 0.3;
@@ -21,6 +19,7 @@ module.exports = class Shard {
         return this.queue.length > 0;
     }
 
+    /* Music */
     async addToQueue(url, channel, instant) {
         try {
             let songs = await this.trackLoader.loadURL(url);
@@ -31,9 +30,10 @@ module.exports = class Shard {
                 songs = Utils.shuffleArray(songs);
             }
 
+            let alreadyPlaying = (this.queue.length > 0);
             this.queue = [...this.queue, ...songs];
 
-            if (instant || !this.isPlaying) {
+            if (!alreadyPlaying || instant) {
                 await this.play(songs[0], channel);
             }
         } catch (e) {
@@ -52,8 +52,6 @@ module.exports = class Shard {
                 connection = await (await this.guild.fetchMember(this.client.user)).voiceChannel.join();
             }
 
-            this.isPlaying = true;
-            this.isPaused = false;
             this.currentSong = this.queue.indexOf(song);
 
             if (song.type === "YOUTUBE") {
@@ -87,8 +85,6 @@ module.exports = class Shard {
 
     async stop() {
         try {
-            this.isPlaying = false;
-            this.isPaused = false;
             this.queue = [];
             this.currentSong = 0;
             let voiceChannel = (await this.guild.fetchMember(this.client.user)).voiceChannel;
@@ -149,11 +145,9 @@ module.exports = class Shard {
 
     async pause() {
         if (this.dispatcher) {
-            if (!this.isPaused) {
-                this.isPaused = true;
+            if (!this.dispatcher.paused) {
                 this.dispatcher.pause();
             } else {
-                this.isPaused = false;
                 this.dispatcher.resume();
             }
         } else {
