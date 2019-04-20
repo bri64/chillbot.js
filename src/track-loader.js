@@ -103,7 +103,7 @@ module.exports = class TrackLoader {
 
     async search(query) {
         try {
-            return (await this.youtube.searchVideos(query))
+            return (await this.youtube.searchVideos(query, 50))
                 .map(video => TrackLoader.parseSong(video));
         } catch (e) {
             console.error(e);
@@ -112,7 +112,7 @@ module.exports = class TrackLoader {
 
     async searchPlaylist(query) {
         try {
-            return (await this.youtube.searchPlaylists(query))
+            return (await this.youtube.searchPlaylists(query, 50))
                 .map(playlist => TrackLoader.parsePlaylist(playlist));
         } catch (e) {
             console.error(e);

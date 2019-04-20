@@ -17,4 +17,17 @@ module.exports = class Utils {
 
         return array;
     }
+
+    static clearReaction(msg, user) {
+        msg.reactions.forEach(reaction => reaction.remove(user));
+    }
+
+    static clearReactions(msg, own) {
+        msg.reactions.filter(reaction => own || !reaction.me).forEach(reaction => {
+            if (own)
+                this.clearReaction(msg, msg.user);
+            // TODO: No Permission
+            // reaction.users.forEach(user => this.clearReaction(user));
+        });
+    }
 };
