@@ -32,6 +32,7 @@ let afterReady = () => {
 process.on('SIGINT', async () => {
    console.info("Shutting down...");
    await ShardManager.shutdown();
+   await Client.user.setStatus('invisible');
    console.info("Goodbye!");
    process.exit(0);
 });
