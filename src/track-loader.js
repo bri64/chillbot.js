@@ -94,10 +94,13 @@ module.exports = class TrackLoader {
 
     static parsePlaylist(playlist) {
         return {
-            id: playlist.id,
-            title: Util.escapeMarkdown(playlist.title),
-            author: playlist.channel.title,
-            url: `https://www.youtube.com/playlist?list=${playlist.id}`
+            type: "YOUTUBE",
+            data: {
+                id: playlist.id,
+                title: Util.escapeMarkdown(playlist.title),
+                author: playlist.channel.title,
+                url: `https://www.youtube.com/playlist?list=${playlist.id}`
+            }
         };
     }
 

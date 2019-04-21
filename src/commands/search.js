@@ -58,8 +58,8 @@ exports.SearchCommand = class SearchCommand extends Command {
         let fields = [];
         pagedResults.forEach(result => {
             fields.push({
-                name: result.title,
-                value: result.url,
+                name: result.data.title,
+                value: result.data.url,
                 inline: true
             });
         });
