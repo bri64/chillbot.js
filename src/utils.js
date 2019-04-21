@@ -18,16 +18,18 @@ module.exports = class Utils {
         return array;
     }
 
-    static clearReaction(msg, user) {
-        msg.reactions.forEach(reaction => reaction.remove(user));
+    static async clearReaction(msg, user) {
+        await msg.reactions.forEach(async (reaction) => await reaction.remove(user));
     }
 
-    static clearReactions(msg, own) {
-        msg.reactions.filter(reaction => own || !reaction.me).forEach(reaction => {
-            if (own)
-                this.clearReaction(msg, msg.user);
+    static async clearReactions(msg, own) {
+        if (own)
+            await this.clearReaction(msg, msg.user);
+        msg.reactions.forEach(reaction => {
             // TODO: No Permission
-            // reaction.users.forEach(user => this.clearReaction(user));
+            reaction.users
+                .filter(user => (user.id !== msg.member.user.id))
+                .forEach(async (user) => await this.clearReaction(msg, user));
         });
     }
 };

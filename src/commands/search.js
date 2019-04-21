@@ -23,6 +23,7 @@ exports.SearchCommand = class SearchCommand extends Command {
             let reply = await this.msg.reply(initResults.embed);
             await this.handlePageReactions(reply, isPlaylist, query, initResults);
         } catch (e) {
+            console.error(e);
             this.msg.reply(`No results found for '${query}'.`);
         }
     }
@@ -47,9 +48,7 @@ exports.SearchCommand = class SearchCommand extends Command {
         const PAGE_SIZE = 5;
         const MIN_PAGE = 1;
         const MAX_PAGE = (MAX_RESULTS / PAGE_SIZE);
-        console.log(page);
         page = (page <= MIN_PAGE) ? MIN_PAGE : ((page > MAX_PAGE) ? MAX_PAGE : page);
-        console.log(page);
         let results = (prevResults != null)
             ? prevResults
             : ((isPlaylist)
@@ -59,13 +58,14 @@ exports.SearchCommand = class SearchCommand extends Command {
         let fields = [];
         pagedResults.forEach(result => {
             fields.push({
-                name: result.data.title,
-                value: result.data.url,
+                name: result.title,
+                value: result.url,
                 inline: true
             });
         });
         return {
             results,
+            page,
             embed: new RichEmbed({
                 title: `Search Results [${page}/10]`,
                 fields: fields,
@@ -75,13 +75,17 @@ exports.SearchCommand = class SearchCommand extends Command {
     }
 
     async handlePrevPage(reply, isPlaylist, query, initResults) {
-        await reply.edit(await this.getResults(isPlaylist, query, this.page -= 1, initResults.results).embeds);
-        Utils.clearReactions(reply,false);
+        let result = await this.getResults(isPlaylist, query, this.page -= 1, initResults.results);
+        this.page = result.page;
+        await reply.edit(result.embed);
+        await Utils.clearReactions(reply,false);
     }
 
     async handleNextPage(reply, isPlaylist, query, initResults) {
-        await reply.edit(await this.getResults(isPlaylist, query, this.page += 1, initResults.results));
-        Utils.clearReactions(reply, false);
+        let result = await this.getResults(isPlaylist, query, this.page += 1, initResults.results);
+        this.page = result.page;
+        await reply.edit(result.embed);
+        await Utils.clearReactions(reply, false);
     }
 
     static aliases() {
