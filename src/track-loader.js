@@ -44,9 +44,8 @@ module.exports = class TrackLoader {
         try {
             let playlist = new Playlist(this.youtube);
 	    playlist.id = Playlist.extractID(url);
-            let videos = await playlist.getVideos(999, {
-		part: "snippet",
-		fields: "items(id,kind,snippet(title,resourceId))"
+            let videos = await playlist.getVideos(undefined, {
+		part: "snippet"
 	    });
             console.info(`Loaded ${videos.length} videos.`);
             return videos.map(video => TrackLoader.parseSong(video));
@@ -58,8 +57,7 @@ module.exports = class TrackLoader {
     async loadTrack(url) {
         try {
             let video = await this.youtube.getVideo(url, {
-		part: "snippet",
-		fields: "items(id,kind,snippet(title))"
+		part: "snippet"
             });
             console.info(`Loaded 1 video.`);
             return [TrackLoader.parseSong(video)];
