@@ -1,5 +1,6 @@
 const { Util } = require("discord.js");
 const YouTube = require('simple-youtube-api');
+const { Playlist } = require('simple-youtube-api');
 const ytdl = require("ytdl-core");
 const fetch = require('node-fetch');
 
@@ -41,8 +42,11 @@ module.exports = class TrackLoader {
 
     async loadPlaylist(url) {
         try {
-            let playlist = await this.youtube.getPlaylist(url);
-            let videos = await playlist.getVideos();
+            let playlist = new Playlist(this.youtube);
+	    playlist.id = Playlist.extractID(url);
+            let videos = await playlist.getVideos(undefined, {
+		part: "snippet"
+	    });
             console.info(`Loaded ${videos.length} videos.`);
             return videos.map(video => TrackLoader.parseSong(video));
         } catch (e) {
@@ -52,7 +56,9 @@ module.exports = class TrackLoader {
 
     async loadTrack(url) {
         try {
-            let video = await this.youtube.getVideo(url);
+            let video = await this.youtube.getVideo(url, {
+		part: "snippet"
+            });
             console.info(`Loaded 1 video.`);
             return [TrackLoader.parseSong(video)];
         } catch (e) {
@@ -85,7 +91,6 @@ module.exports = class TrackLoader {
             data: {
                 id: video.id,
                 title: Util.escapeMarkdown(video.title),
-                author: video.channel.title,
                 url: `https://www.youtube.com/watch?v=${video.id}`,
                 video: video
             }
@@ -96,7 +101,6 @@ module.exports = class TrackLoader {
         return {
             id: playlist.id,
             title: Util.escapeMarkdown(playlist.title),
-            author: playlist.channel.title,
             url: `https://www.youtube.com/playlist?list=${playlist.id}`
         };
     }
