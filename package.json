@@ -15,12 +15,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bufferutil": "^4.0.1",
     "discord.js": "^11.5.1",
+    "ffmpeg": "0.0.4",
     "node-fetch": "^2.6.0",
-    "node-opus": "^0.3.2",
+    "opusscript": "0.0.7",
     "require-all": "^3.0.0",
     "simple-youtube-api": "^5.1.1",
-    "ytdl-core": "^0.29.5"
+    "ytdl-core": "^2.0.0"
   }
 }
