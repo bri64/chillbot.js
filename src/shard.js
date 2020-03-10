@@ -61,19 +61,20 @@ module.exports = class Shard {
                             await this.nextTrack();
                         }
                     })
-                    .on("error", (e) => console.error(e));
+                    .on("error", (error) => {
+                        console.error('YT Playback Error: ', error)
+                    })
             } else if (song.type === "SOUNDCLOUD") {
                 let stream = song.data.stream;
                 this.dispatcher = connection.playArbitraryInput(stream, {})
-                    .on("start", () => {
-
-                    })
                     .on("end", async (reason) => {
                         if (reason != null) {
                             await this.nextTrack();
                         }
                     })
-                    .on("error", (e) => console.error(e));
+                    .on("error", (error) => {
+                        console.error('SC Playback Error: ', error)
+                    })
             } else {
                 throw new Error("Unknown track format!");
             }
